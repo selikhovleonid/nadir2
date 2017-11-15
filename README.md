@@ -1,2 +1,5 @@
-# nadir2
-Nadir PHP Microframework Version 2
+# Nadir2
+
+Yet Another PHP Microframework
+
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)]()

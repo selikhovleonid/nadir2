@@ -1,0 +1,27 @@
+{
+    "name": "selikhovleonid/nadir2",
+    "description": "Nadir PHP Microframework Version 2",
+    "keywords": [
+        "nadir",
+        "framework",
+        "microframework"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Leonid Selikhov",
+            "email": "selikhovleonid@ya.ru",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.1.0"
+    },
+    "autoload": {
+        "files": ["src/functions.php"],
+        "psr-4": {
+            "nadir2\\": "src/"
+        }
+    }
+}
