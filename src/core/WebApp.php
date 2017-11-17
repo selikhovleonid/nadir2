@@ -22,7 +22,7 @@ class WebApp extends AbstractApp
     /**
      * {@inheritdoc}
      */
-    public function handleRequest()
+    public function handleRequest(): void
     {
         $oRequest      = new Request();
         $oCtrlResolver = new WebCtrlResolver($oRequest);

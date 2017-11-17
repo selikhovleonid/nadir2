@@ -76,7 +76,7 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
      * @return self.
      * @throws Exception.
      */
-    public function run()
+    public function run(): void
     {
         if (!$this->isAppRootSet()) {
             throw new Exception("The application root wasn't defined.", 1);
@@ -87,7 +87,7 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
         $sConfigPath = $this->getAppRoot().$this->getConfigFile();
         if (!is_readable($sConfigPath)) {
             throw new Exception("It's unable to load ".$sConfigPath
-            .'as main config file.', 4);
+                .'as main config file.', 4);
         }
         $mConfig = include $sConfigPath;
         if (!is_array($mConfig)) {
@@ -100,7 +100,7 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
      * It returns the config value by passed name or all config set if it wasn't
      * specified.
      * @param string $sName The config name.
-     * @return array|null.
+     * @return array|string|null.
      */
     public function getConfig($sName = '')
     {

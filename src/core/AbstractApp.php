@@ -57,12 +57,12 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
 
     /**
      * It sets the root of application.
-     * @param string $sAppRoot The path to the application root.
+     * @param string $appRoot The path to the application root.
      * @return self.
      */
-    public function setAppRoot($sAppRoot)
+    public function setAppRoot(string $appRoot): self
     {
-        $this->appRoot = $sAppRoot;
+        $this->appRoot = $appRoot;
         return static::$instance;
     }
 
@@ -80,7 +80,7 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
     /**
      * {@inheritdoc}
      */
-    public function run()
+    public function run(): void
     {
         $this->init();
     }
@@ -88,7 +88,7 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
     /**
      * {@inheritdoc}
      */
-    public function init()
+    public function init(): void
     {
         $this->initHelper();
         $this->runCustomProcess();
@@ -99,7 +99,7 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
     /**
      * {@inheritdoc}
      */
-    abstract public function handleRequest();
+    abstract public function handleRequest(): void;
 
     /**
      * It inits the application helper.

@@ -55,5 +55,5 @@ abstract class AbstractCtrlResolver implements RunnableInterface
     /**
      * It starts the controller action on execution.
      */
-    abstract public function run();
+    abstract public function run(): void;
 }

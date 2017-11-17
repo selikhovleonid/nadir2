@@ -11,7 +11,7 @@ interface RunnableInterface
 
     /**
      * It executes the process.
-     * @return void.
+     * @return void
      */
-    public function run();
+    public function run(): void;
 }

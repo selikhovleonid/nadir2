@@ -34,7 +34,7 @@ class WebCtrlResolver extends AbstractCtrlResolver
         $aComponentsRootMap = AppHelper::getInstance()->getConfig('componentsRootMap');
         if (!isset($aComponentsRootMap['controllers'])) {
             throw new Exception("The field 'componentsRootMap.controllers' must be "
-            ."presented in the main configuration file.");
+                ."presented in the main configuration file.");
         }
         $sCtrlNamespace = str_replace(\DIRECTORY_SEPARATOR, '\\',
             $aComponentsRootMap['controllers']);
@@ -79,7 +79,7 @@ class WebCtrlResolver extends AbstractCtrlResolver
      * It runs the controller action on execution.
      * @throws \core\Exception.
      */
-    public function run()
+    public function run(): void
     {
         $this->tryAssignController();
         if (!$this->isControllerAssigned()) {
