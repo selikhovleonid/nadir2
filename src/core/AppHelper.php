@@ -103,7 +103,7 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
      * @param string $sName The config name.
      * @return mixed|null
      */
-    public function getConfig(string $sName = '')
+    public function getConfig(?string $sName = '')
     {
         if (empty($sName)) {
             return $this->configSet;
@@ -145,7 +145,7 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
      * @param boolean $asAbsolute The optional flag is equal true by default.
      * @return string|null
      */
-    public function getComponentUrl(string $name, bool $asAbsolute = true): ?string
+    public function getComponentUrl(string $name, ?bool $asAbsolute = true): ?string
     {
         $rootMap = $this->getConfig('componentsRootMap');
         $siteUrl = $asAbsolute ? $this->siteBaseUrl : '';
