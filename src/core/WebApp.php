@@ -16,7 +16,7 @@ class WebApp extends AbstractApp
      */
     protected function __construct()
     {
-        // nothing here...
+        // Nothing here...
     }
 
     /**

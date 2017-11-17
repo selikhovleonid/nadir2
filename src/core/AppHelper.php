@@ -4,7 +4,7 @@ namespace nadir2\core;
 
 /**
  * The application helper class, which provides config data loading and general 
- * access to them. It realized as Singleton.
+ * access to them. It's realized as Singleton.
  * @author Leonid Selikhov.
  */
 class AppHelper extends AbstractAutoAccessors implements RunnableInterface
@@ -22,14 +22,14 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
     private static $instance = null;
 
     /** @var mixed[] The configuration data set. */
-    private $configSet = array();
+    private $configSet = [];
 
     /** @var string The site basic URL. */
-    private $siteBaseUrl = null;
+    private $siteBaseUrl = '';
 
     /**
      * The closed class constructor. It determines  the site basic URL.
-     * @return self.
+     * @return self
      */
     private function __construct()
     {
@@ -38,9 +38,9 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
 
     /**
      * It retrurns the current class instance.
-     * @return self.
+     * @return self
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
@@ -50,59 +50,60 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
 
     /**
      * This is mutator-method. It sets the path to the root of application.
-     * @param string $sRoot The path to the application root.
-     * @return self.
+     * @param string $appRoot The path to the application root.
+     * @return self
      */
-    public function setAppRoot($sRoot)
+    public function setAppRoot(string $appRoot): self
     {
-        $this->appRoot = $sRoot;
+        $this->appRoot = $appRoot;
         return self::$instance;
     }
 
     /**
      * It sets the path to the main configuration of application file relative
      * to its root.
-     * @param string $sFilePath.
-     * @return self.
+     * @param string $filePath
+     * @return self
      */
-    public function setConfigFile($sFilePath)
+    public function setConfigFile(string $filePath): self
     {
-        $this->configFile = $sFilePath;
+        $this->configFile = $filePath;
         return self::$instance;
     }
 
     /**
      * It loads main file of configuration and checks for validity. 
-     * @return self.
-     * @throws Exception.
+     * @return void
+     * @throws Exception It's throwen if some errors with the main configuration
+     * file occurred.
      */
     public function run(): void
     {
         if (!$this->isAppRootSet()) {
-            throw new Exception("The application root wasn't defined.", 1);
+            throw new Exception("The application root wasn't defined.");
         }
         if (!$this->isConfigFileSet()) {
-            throw new Exception("The main config file wasn't defined.", 2);
+            throw new Exception("The main config file wasn't defined.");
         }
-        $sConfigPath = $this->getAppRoot().$this->getConfigFile();
-        if (!is_readable($sConfigPath)) {
-            throw new Exception("It's unable to load ".$sConfigPath
-                .'as main config file.', 4);
+        $configPath = $this->getAppRoot().$this->getConfigFile();
+        if (!is_readable($configPath)) {
+            throw new Exception("It's unable to load ".$configPath
+                .'as main config file.');
         }
-        $mConfig = include $sConfigPath;
-        if (!is_array($mConfig)) {
-            throw new Exception('The main config must be an array.', 5);
+        $config = require_once $configPath;
+        if (!is_array($config)) {
+            throw new Exception('The main config must be an array.');
         }
-        $this->configSet = $mConfig;
+        $this->configSet = $config;
     }
 
     /**
      * It returns the config value by passed name or all config set if it wasn't
      * specified.
      * @param string $sName The config name.
-     * @return array|string|null.
+     * @return mixed|null
      */
-    public function getConfig($sName = '')
+    public function getConfig(string $sName = '')
     {
         if (empty($sName)) {
             return $this->configSet;
@@ -115,23 +116,23 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
 
     /**
      * It determines the basic site URL.
-     * @return string.
+     * @return string|null
      */
-    private static function getBaseUrl()
+    private static function getBaseUrl(): ?string
     {
         if (isset($_SERVER['SERVER_NAME'])) {
-            $sProtocol = !empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS'])
+            $protocol = !empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS'])
                 == 'on' ? 'https' : 'http';
-            return $sProtocol.'://'.$_SERVER['SERVER_NAME'];
+            return $protocol.'://'.$_SERVER['SERVER_NAME'];
         }
         return null;
     }
 
     /**
      * This is method-accessor to basic site URL.
-     * @return string.
+     * @return string|null
      */
-    public function getSiteBaseUrl()
+    public function getSiteBaseUrl(): ?string
     {
         return $this->siteBaseUrl;
     }
@@ -140,26 +141,26 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
      * The method returns absolute or relative path (URL) to the component by 
      * passed name. The absolute URL used to determs path to assets (media-data) 
      * as usual.
-     * @param string $sName The component name.
-     * @param boolean $fAsAbsolute The optional flag is equal true by default.
-     * @return string.
+     * @param string $name The component name.
+     * @param boolean $asAbsolute The optional flag is equal true by default.
+     * @return string|null
      */
-    public function getComponentUrl($sName, $fAsAbsolute = true)
+    public function getComponentUrl(string $name, bool $asAbsolute = true): ?string
     {
-        $aRootMap = $this->getConfig('componentsRootMap');
-        $sSiteUrl = $fAsAbsolute ? $this->siteBaseUrl : '';
-        return isset($aRootMap[$sName]) ? $sSiteUrl.$aRootMap[$sName] : null;
+        $rootMap = $this->getConfig('componentsRootMap');
+        $siteUrl = $asAbsolute ? $this->siteBaseUrl : '';
+        return isset($rootMap[$name]) ? $siteUrl.$rootMap[$name] : null;
     }
 
     /**
      * The method returns full path to the parent directory of component by its
      * name.
-     * @param string $sName The component name.
-     * @return string|null.
+     * @param string $name The component name.
+     * @return string|null
      */
-    public function getComponentRoot($sName)
+    public function getComponentRoot(string $name): ?string
     {
-        $aRootMap = $this->getConfig('componentsRootMap');
-        return isset($aRootMap[$sName]) ? $this->getAppRoot().$aRootMap[$sName] : null;
+        $rootMap = $this->getConfig('componentsRootMap');
+        return isset($rootMap[$name]) ? $this->getAppRoot().$rootMap[$name] : null;
     }
 }
