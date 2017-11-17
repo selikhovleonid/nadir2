@@ -4,8 +4,8 @@ namespace nadir2\core;
 
 /**
  * This is an abstract application class. It determines the central entry point for
- * the all requests, creates the configured application. It implements Front 
- * Controller pattern, it's Singleton-instance.
+ * the all requests, it creates the configured application. AbstractApp implements
+ * Front Controller pattern, it's Singleton-instance.
  * @author Leonid Selikhov
  */
 abstract class AbstractApp extends AbstractAutoAccessors implements FrontControllerInterface,
@@ -34,9 +34,9 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
     /**
      * It returns the context called singleton-instance. It implements late static
      * binding.
-     * @return self.
+     * @return self
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (is_null(static::$instance)) {
             static::$instance = new static();
@@ -46,19 +46,19 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
 
     /**
      * It sets the path to the main application config file referenced to its root.
-     * @param string $sFilePath.
-     * @return self.
+     * @param string $filePath
+     * @return self
      */
-    public function setConfigFile($sFilePath)
+    public function setConfigFile(string $filePath): self
     {
-        $this->configFile = $sFilePath;
+        $this->configFile = $filePath;
         return static::$instance;
     }
 
     /**
      * It sets the root of application.
      * @param string $appRoot The path to the application root.
-     * @return self.
+     * @return self
      */
     public function setAppRoot(string $appRoot): self
     {
@@ -68,12 +68,12 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
 
     /**
      * It sets the custom Process.
-     * @param \nadir2\core\ProcessInterface $oProcess The user defined Process object.
-     * @return self.
+     * @param \nadir2\core\ProcessInterface $process The user defined Process object.
+     * @return self
      */
-    public function setCustomProcess(ProcessInterface $oProcess)
+    public function setCustomProcess(ProcessInterface $process): self
     {
-        $this->customProcess = $oProcess;
+        $this->customProcess = $process;
         return static::$instance;
     }
 
@@ -103,9 +103,9 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
 
     /**
      * It inits the application helper.
-     * @return void.
+     * @return void
      */
-    private function initHelper()
+    private function initHelper(): void
     {
         if (!$this->isConfigFileSet()) {
             throw new Exception("The main config file wasn't defined.");
@@ -123,9 +123,9 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
      * This method runs custom process. The highest priority has a Process that
      * has been set by the setCustomProcess() method. If it wasn't set, it inits
      * the default Process from the project skeleton extension.
-     * @return void.
+     * @return void
      */
-    private function runCustomProcess()
+    private function runCustomProcess(): void
     {
         if ($this->isCustomProcessSet()) {
             $this->getCustomProcess()->run();
@@ -136,9 +136,9 @@ abstract class AbstractApp extends AbstractAutoAccessors implements FrontControl
 
     /**
      * The method kills custom process.
-     * @return void.
+     * @return void
      */
-    private function stopCustomProcess()
+    private function stopCustomProcess(): void
     {
         if ($this->isCustomProcessSet()) {
             $this->getCustomProcess()->stop();
