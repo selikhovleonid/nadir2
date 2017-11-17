@@ -24,8 +24,6 @@ class WebApp extends AbstractApp
      */
     public function handleRequest(): void
     {
-        $oRequest      = new Request();
-        $oCtrlResolver = new WebCtrlResolver($oRequest);
-        $oCtrlResolver->run();
+        (new WebCtrlResolver(new Request()))->run();
     }
 }
