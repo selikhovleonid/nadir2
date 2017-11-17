@@ -62,13 +62,13 @@ class WebCtrlResolver extends AbstractCtrlResolver
     {
         $method = strtolower($this->request->getMethod());
         if (isset($this->routeMap[$method])) {
-            foreach ($this->routeMap[$method] as $route => $routeConfigs) {
+            foreach ($this->routeMap[$method] as $route => $config) {
                 $params = [];
                 if (preg_match('#^'.$route.'/?$#u',
                         urldecode($this->request->getUrlPath()), $params)) {
-                    AppHelper::getInstance()->setRouteConfig($routeConfigs);
-                    $this->ctrlName   = $routeConfigs['ctrl'][0];
-                    $this->actionName = $routeConfigs['ctrl'][1];
+                    AppHelper::getInstance()->setRouteConfig($config);
+                    $this->ctrlName   = $config['ctrl'][0];
+                    $this->actionName = $config['ctrl'][1];
                     unset($params[0]);
                     $this->actionArgs = array_values($params);
                     break;
@@ -79,7 +79,8 @@ class WebCtrlResolver extends AbstractCtrlResolver
 
     /**
      * It runs the controller action on execution.
-     * @throws \nadir2\core\Exception
+     * @throws \nadir2\core\Exception It's throwen if the attempt to assign controller
+     * with current route path was failed.
      */
     public function run(): void
     {
