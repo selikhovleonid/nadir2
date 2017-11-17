@@ -27,7 +27,7 @@ class WebCtrlResolver extends AbstractCtrlResolver
      * objects.
      * @return \nadir2\core\AWebController.
      */
-    protected function createCtrl()
+    protected function createCtrl(): AbstractCtrl
     {
         $oView              = ViewFactory::createView($this->ctrlName,
                 str_replace('action', '', $this->actionName));
@@ -56,7 +56,7 @@ class WebCtrlResolver extends AbstractCtrlResolver
     /**
      *  {@inheritdoc}
      */
-    protected function tryAssignController()
+    protected function tryAssignController(): void
     {
         $sMethod = strtolower($this->request->getMethod());
         if (isset($this->routeMap[$sMethod])) {

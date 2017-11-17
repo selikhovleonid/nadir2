@@ -8,7 +8,7 @@ namespace nadir2\core;
  * possibility of creating an instance of the class. 
  * @author Leonid Selikhov
  */
-abstract class AbstractWebCtrl
+abstract class AbstractWebCtrl extends AbstractCtrl
 {
     /** @var \nadir2\core\Request The request object. */
     protected $request = null;

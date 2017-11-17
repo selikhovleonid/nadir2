@@ -7,7 +7,7 @@ namespace nadir2\core;
  * @author Roman Lapotchkin
  * @author Leonid Selikhov
  */
-class AbstractCliCtrl
+class AbstractCliCtrl extends AbstractCtrl
 {
 
     /**
