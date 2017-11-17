@@ -14,43 +14,45 @@ class WebCtrlResolver extends AbstractCtrlResolver
 
     /**
      * It inits the request property.
-     * @param \nadir2\core\Request $oRequest.
+     * @param \nadir2\core\Request $request
      */
-    public function __construct(Request $oRequest)
+    public function __construct(Request $request)
     {
         parent::__construct();
-        $this->request = $oRequest;
+        $this->request = $request;
     }
 
     /**
      * It creates the controller object, assignes it with default view and layout
      * objects.
-     * @return \nadir2\core\AWebController.
+     * @return \nadir2\core\AWebController
+     * @throws \nadir2\core\Exception It's throwen if the 'componentsRootMap.controllers'
+     * field not presented in the main config.
      */
     protected function createCtrl(): AbstractCtrl
     {
-        $oView              = ViewFactory::createView($this->ctrlName,
+        $view              = ViewFactory::createView($this->ctrlName,
                 str_replace('action', '', $this->actionName));
-        $aComponentsRootMap = AppHelper::getInstance()->getConfig('componentsRootMap');
-        if (!isset($aComponentsRootMap['controllers'])) {
+        $componentsRootMap = AppHelper::getInstance()->getConfig('componentsRootMap');
+        if (!isset($componentsRootMap['controllers'])) {
             throw new Exception("The field 'componentsRootMap.controllers' must be "
-                ."presented in the main configuration file.");
+                .'presented in the main configuration file.');
         }
-        $sCtrlNamespace = str_replace(\DIRECTORY_SEPARATOR, '\\',
-            $aComponentsRootMap['controllers']);
-        $sCtrlNameFull  = $sCtrlNamespace.'\\'.$this->ctrlName;
-        if (!is_null($oView)) {
-            $sLayoutName = AppHelper::getInstance()->getConfig('defaultLayout');
-            if (!is_null($sLayoutName)) {
-                $oLayout = ViewFactory::createLayout($sLayoutName, $oView);
-                $oCtrl   = new $sCtrlNameFull($this->request, $oLayout);
+        $ctrlNamespace = str_replace(\DIRECTORY_SEPARATOR, '\\',
+            $componentsRootMap['controllers']);
+        $ctrlFullName  = $ctrlNamespace.'\\'.$this->ctrlName;
+        if (!is_null($view)) {
+            $layoutName = AppHelper::getInstance()->getConfig('defaultLayout');
+            if (!is_null($layoutName)) {
+                $layout = ViewFactory::createLayout($layoutName, $view);
+                $ctrl   = new $ctrlFullName($this->request, $layout);
             } else {
-                $oCtrl = new $sCtrlNameFull($this->request, $oView);
+                $ctrl = new $ctrlFullName($this->request, $view);
             }
         } else {
-            $oCtrl = new $sCtrlNameFull($this->request);
+            $ctrl = new $ctrlFullName($this->request);
         }
-        return $oCtrl;
+        return $ctrl;
     }
 
     /**
@@ -58,17 +60,17 @@ class WebCtrlResolver extends AbstractCtrlResolver
      */
     protected function tryAssignController(): void
     {
-        $sMethod = strtolower($this->request->getMethod());
-        if (isset($this->routeMap[$sMethod])) {
-            foreach ($this->routeMap[$sMethod] as $sRoute => $aRouteConfig) {
-                if (preg_match('#^'.$sRoute.'/?$#u',
-                        urldecode($this->request->getUrlPath()), $aParam)
-                ) {
-                    AppHelper::getInstance()->setRouteConfig($aRouteConfig);
-                    $this->ctrlName   = $aRouteConfig['ctrl'][0];
-                    $this->actionName = $aRouteConfig['ctrl'][1];
-                    unset($aParam[0]);
-                    $this->actionArgs = array_values($aParam);
+        $method = strtolower($this->request->getMethod());
+        if (isset($this->routeMap[$method])) {
+            foreach ($this->routeMap[$method] as $route => $routeConfigs) {
+                $params = [];
+                if (preg_match('#^'.$route.'/?$#u',
+                        urldecode($this->request->getUrlPath()), $params)) {
+                    AppHelper::getInstance()->setRouteConfig($routeConfigs);
+                    $this->ctrlName   = $routeConfigs['ctrl'][0];
+                    $this->actionName = $routeConfigs['ctrl'][1];
+                    unset($params[0]);
+                    $this->actionArgs = array_values($params);
                     break;
                 }
             }
@@ -77,7 +79,7 @@ class WebCtrlResolver extends AbstractCtrlResolver
 
     /**
      * It runs the controller action on execution.
-     * @throws \core\Exception.
+     * @throws \nadir2\core\Exception
      */
     public function run(): void
     {
@@ -85,8 +87,7 @@ class WebCtrlResolver extends AbstractCtrlResolver
         if (!$this->isControllerAssigned()) {
             throw new Exception("It's unable to assign controller to this route path.");
         }
-        $oCtrl        = $this->createCtrl();
-        $oCtrlWrapper = new CtrlWrapper($oCtrl);
-        $oCtrlWrapper->{$this->actionName}($this->actionArgs);
+        (new CtrlWrapper($this->createCtrl()))
+            ->{$this->actionName}($this->actionArgs);
     }
 }
