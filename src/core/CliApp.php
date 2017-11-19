@@ -23,16 +23,15 @@ class CliApp extends AbstractApp
      * It processes the call parameters of cli-script and passed them to the
      * CliCtrlResolver object.
      * @global string[] $argv The array of passed to cli-scrypt args.
-     * @throws \core\Exception It throws if it was attempting to call cli-scprit
+     * @throws \core\Exception It's throwen if it was attempting to call cli-scprit
      * out the command line interface.
      */
-    public function handleRequest()
+    public function handleRequest(): void
     {
         global $argv;
         if (!is_array($argv) || empty($argv)) {
-            throw new Exception("Invalid value of the cli args array was given.");
+            throw new Exception('Invalid value of the cli args array was given.');
         }
-        $oCtrlResolver = new CliCtrlResolver($argv);
-        $oCtrlResolver->run();
+        (new CliCtrlResolver($argv))->run();
     }
 }
