@@ -3,7 +3,7 @@
 namespace nadir2\core;
 
 /**
- * This class provides the choosing of controller, passing the request parameters 
+ * This class provides the choosing of controller, passing the request parameters
  * in it and binding with corresponding layout and view.
  * @author Leonid Selikhov
  */
@@ -31,15 +31,20 @@ class WebCtrlResolver extends AbstractCtrlResolver
      */
     protected function createCtrl(): AbstractCtrl
     {
-        $view              = ViewFactory::createView($this->ctrlName,
-                str_replace('action', '', $this->actionName));
+        $view              = ViewFactory::createView(
+            $this->ctrlName,
+            str_replace('action', '', $this->actionName)
+        );
         $componentsRootMap = AppHelper::getInstance()->getConfig('componentsRootMap');
         if (!isset($componentsRootMap['controllers'])) {
             throw new Exception("The field 'componentsRootMap.controllers' must be "
                 .'presented in the main configuration file.');
         }
-        $ctrlNamespace = str_replace(\DIRECTORY_SEPARATOR, '\\',
-            $componentsRootMap['controllers']);
+        $ctrlNamespace = str_replace(
+            \DIRECTORY_SEPARATOR,
+            '\\',
+            $componentsRootMap['controllers']
+        );
         $ctrlFullName  = $ctrlNamespace.'\\'.$this->ctrlName;
         if (!is_null($view)) {
             $layoutName = AppHelper::getInstance()->getConfig('defaultLayout');
@@ -64,8 +69,11 @@ class WebCtrlResolver extends AbstractCtrlResolver
         if (isset($this->routeMap[$method])) {
             foreach ($this->routeMap[$method] as $route => $config) {
                 $params = [];
-                if (preg_match('#^'.$route.'/?$#u',
-                        urldecode($this->request->getUrlPath()), $params)) {
+                if (preg_match(
+                    '#^'.$route.'/?$#u',
+                    urldecode($this->request->getUrlPath()),
+                    $params
+                )) {
                     AppHelper::getInstance()->setRouteConfig($config);
                     $this->ctrlName   = $config['ctrl'][0];
                     $this->actionName = $config['ctrl'][1];

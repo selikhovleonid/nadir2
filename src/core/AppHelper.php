@@ -3,7 +3,7 @@
 namespace nadir2\core;
 
 /**
- * The application helper class, which provides config data loading and general 
+ * The application helper class, which provides config data loading and general
  * access to them. It's realized as Singleton.
  * @author Leonid Selikhov.
  */
@@ -72,7 +72,7 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
     }
 
     /**
-     * It loads main file of configuration and checks for validity. 
+     * It loads main file of configuration and checks for validity.
      * @return void
      * @throws Exception It's throwen if some errors with the main configuration
      * file occurred.
@@ -138,8 +138,8 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
     }
 
     /**
-     * The method returns absolute or relative path (URL) to the component by 
-     * passed name. The absolute URL used to determs path to assets (media-data) 
+     * The method returns absolute or relative path (URL) to the component by
+     * passed name. The absolute URL used to determs path to assets (media-data)
      * as usual.
      * @param string $name The component name.
      * @param boolean $asAbsolute The optional flag is equal true by default.
