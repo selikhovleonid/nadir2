@@ -15,45 +15,52 @@ class CtrlWrapper
 
     /**
      * The constructor assigns the object-wrapper with controller object.
-     * @param \nadir2\core\AbstractWebCtrl $oCtrl The controller object.
+     * @param \nadir2\core\AbstractWebCtrl $ctrl The controller object.
      */
-    public function __construct(AbstractWebCtrl $oCtrl)
+    public function __construct(AbstractWebCtrl $ctrl)
     {
-        $this->ctrl = $oCtrl;
+        $this->ctrl = $ctrl;
     }
 
     /**
-     * The method calls user's auth checking, on successful complition of which
+     * The method calls user auth checking, on successful complition of which
      * it invokes the target controller and the onFail method of Auth class in
      * other case.
-     * @param type $sName The action name of target controller.
-     * @param type $aArgs The action parameters.
+     * @param string $actionName The action name of target controller.
+     * @param mixed[] $actionArgs The action parameters.
      */
-    protected function processAuth($sName, & $aArgs)
+    protected function processAuth(string $actionName, array $actionArgs): void
     {
-        if (class_exists('\extensions\core\Auth')) {
-            $oAuth = new \extensions\core\Auth($this->ctrl->getRequest());
-            $oAuth->run();
-            if ($oAuth->isValid()) {
-                if (empty($aArgs)) {
-                    $this->ctrl->{$sName}();
-                } else {
-                    $oMethod = new \ReflectionMethod($this->ctrl, $sName);
-                    $oMethod->invokeArgs($this->ctrl, $aArgs);
-                }
+        // Lambda
+        $callAction = function (string $actionName, array $actionArgs) {
+            if (empty($actionArgs)) {
+                $this->ctrl->{$actionName}();
             } else {
-                $oAuth->onFail();
+                (new \ReflectionMethod($this->ctrl, $actionName))
+                        ->invokeArgs($this->ctrl, $actionArgs);
             }
+        };
+
+        if (class_exists('\extensions\core\Auth')) {
+            $auth = new \extensions\core\Auth($this->ctrl->getRequest());
+            $auth->run();
+            if ($auth->isValid()) {
+                $callAction($actionName, $actionArgs);
+            } else {
+                $auth->onFail();
+            }
+        } else {
+            $callAction($actionName, $actionArgs);
         }
     }
 
     /**
      * This is the method-interseptor of method calling of the target controller.
-     * @param string $sName The action name of target controller.
-     * @param mixed[] $aArgs The action parameters.
+     * @param string $actionName The action name of target controller.
+     * @param mixed[] $actionArgs The action parameters.
      */
-    public function __call($sName, $aArgs)
+    public function __call(string $actionName, array $actionArgs): void
     {
-        $this->processAuth($sName, $aArgs);
+        $this->processAuth($actionName, $actionArgs);
     }
 }
