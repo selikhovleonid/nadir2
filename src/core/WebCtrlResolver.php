@@ -68,17 +68,17 @@ class WebCtrlResolver extends AbstractCtrlResolver
         $method = strtolower($this->request->getMethod());
         if (isset($this->routeMap[$method])) {
             foreach ($this->routeMap[$method] as $route => $config) {
-                $params = [];
+                $actionArgs = [];
                 if (preg_match(
                     '#^'.$route.'/?$#u',
                     urldecode($this->request->getUrlPath()),
-                    $params
+                    $actionArgs
                 )) {
                     AppHelper::getInstance()->setRouteConfig($config);
                     $this->ctrlName   = $config['ctrl'][0];
                     $this->actionName = $config['ctrl'][1];
-                    unset($params[0]);
-                    $this->actionArgs = array_values($params);
+                    unset($actionArgs[0]);
+                    $this->actionArgs = array_values($actionArgs);
                     break;
                 }
             }
