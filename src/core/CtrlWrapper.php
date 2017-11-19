@@ -37,7 +37,7 @@ class CtrlWrapper
                 $this->ctrl->{$actionName}();
             } else {
                 (new \ReflectionMethod($this->ctrl, $actionName))
-                        ->invokeArgs($this->ctrl, $actionArgs);
+                    ->invokeArgs($this->ctrl, $actionArgs);
             }
         };
 
