@@ -13,51 +13,53 @@ abstract class AbstractView extends AbstractUserPropAccessor
 
     /**
      * The constructor inits private object properties.
-     * @param string $sViewFilePath The path to the file with view markup.
-     * @return self.
+     * @param string $viewFilePath The path to the file with view markup.
+     * @return self
      */
-    public function __construct($sViewFilePath)
+    public function __construct(string $viewFilePath)
     {
-        $this->setFilePath($sViewFilePath);
+        $this->setFilePath($viewFilePath);
     }
 
     /**
      * This is method-accessor to the variable which contains the path to the file
      * with view markup.
-     * @return string.
+     * @return string
      */
-    public function getFilePath()
+    public function getFilePath(): string
     {
         return $this->filePath;
     }
 
     /**
-     * It assigns the object with view file.
-     * @param string $sViewFilePath The path to the file with view markup.
-     * @throws Exception It throws if file isn't readable.
+     * It assosiates the object with view file.
+     * @param string $viewFilePath The path to the file with view markup.
+     * @return void
+     * @throws \nadir2\core\Exception It throws if file isn't readable.
      */
-    public function setFilePath($sViewFilePath)
+    public function setFilePath(string $viewFilePath): void
     {
-        if (!is_readable($sViewFilePath)) {
-            throw new Exception("The View file {$sViewFilePath} isn't readable.");
+        if (!is_readable($viewFilePath)) {
+            throw new Exception("The View file {$viewFilePath} isn't readable.");
         }
-        $this->filePath = $sViewFilePath;
+        $this->filePath = $viewFilePath;
     }
 
     /**
-     * The method provides massive assignment user's variables of the class.
-     * @param array $aData The users's variables of the class.
+     * The method provides massive assignment user variables of the class.
+     * @param array $data The users's variables of the class.
+     * @return void
      */
-    public function setVariables(array $aData)
+    public function setVariables(array $data): void
     {
-        foreach ($aData as $sKey => $mValue) {
-            $this->$sKey = $mValue;
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
         }
     }
 
     /**
      * It's an abstract method which renders the file of view.
-     * @return void.
+     * @return void
      */
-    abstract public function render();
+    abstract public function render(): void;
 }
