@@ -8,26 +8,33 @@ namespace nadir2\core;
  */
 class AbstractCliCtrl extends AbstractCtrl
 {
-    /** This map consists of predefined font colors.*/
+    /** This map consists of predefined font colors. */
     protected const FONT_COLOR_MAP = [
-        'black'      => '0;30',
-        'lightRed'   => '1;31',
-        'red'        => '0;31',
-        'yellow'     => '1;33',
-        'lightGreen' => '1;32',
-        'green'      => '0;32',
-        'lightBlue'  => '1;34',
-        'blue'       => '0;34',
-        'white'      => '1;37',
+        'black'       => '0;30',
+        'red'         => '0;31',
+        'lightRed'    => '1;31',
+        'green'       => '0;32',
+        'lightGreen'  => '1;32',
+        'yellow'      => '1;33',
+        'blue'        => '0;34',
+        'lightBlue'   => '1;34',
+        'purple'      => '0;35',
+        'lightPurple' => '1;35',
+        'cyan'        => '0;36',
+        'lightCyan'   => '1;36',
+        'white'       => '1;37',
     ];
-    
-    /** This map consists of predefined background colors.*/
-    protected const BG_COLOR_MAP   = [
-        'black'  => '40',
-        'red'    => '41',
-        'yellow' => '43',
-        'green'  => '42',
-        'blue'   => '44',
+
+    /** This map consists of predefined background colors. */
+    protected const BG_COLOR_MAP = [
+        'black'     => '40',
+        'red'       => '41',
+        'green'     => '42',
+        'yellow'    => '43',
+        'blue'      => '44',
+        'magenta'   => '45',
+        'cyan'      => '46',
+        'lightGray' => '47',
     ];
 
     /**
