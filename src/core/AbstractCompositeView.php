@@ -10,30 +10,30 @@ namespace nadir2\core;
 abstract class AbstractCompositeView extends AbstractView
 {
     /** @var \nadir2\core\Snippet[] The snippet map. */
-    protected $snippets = array();
+    protected $snippets = [];
 
     /**
      * It adds snippet to the view object.
-     * @param string $sSnptName
+     * @param string $snptName
+     * @return void
      */
-    public function addSnippet($sSnptName)
+    public function addSnippet(string $snptName): void
     {
-        $oSnpt                      = ViewFactory::createSnippet($sSnptName);
-        $this->snippets[$sSnptName] = $oSnpt;
+        $this->snippets[$snptName] = ViewFactory::createSnippet($snptName);
     }
 
     /**
      * It returns assigned snippet object by the name. If the name not presents,
      * then it returns the map with all View-assigned snippets.
-     * @param string $sSnptName
-     * @return \nadir2\core\Snippet|\core\Snippet[]|null
+     * @param string $snptName
+     * @return \nadir2\core\Snippet|\nadir2\core\Snippet[]|null
      */
-    public function getSnippet($sSnptName = '')
+    public function getSnippet(string $snptName = '')
     {
-        if (empty($sSnptName)) {
+        if (empty($snptName)) {
             return $this->snippets;
         } else {
-            return isset($this->snippets[$sSnptName]) ? $this->snippets[$sSnptName]
+            return isset($this->snippets[$snptName]) ? $this->snippets[$snptName]
                     : null;
         }
     }
@@ -42,7 +42,7 @@ abstract class AbstractCompositeView extends AbstractView
      * The method returns the View-assigned snippet map.
      * @return \nadir2\core\Snippet[]
      */
-    public function getAllSnippets()
+    public function getAllSnippets(): array
     {
         return $this->getSnippet();
     }
