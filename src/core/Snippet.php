@@ -12,7 +12,7 @@ class Snippet extends AbstractView
     /**
      * {@inheritdoc}
      */
-    public function render()
+    public function render(): void
     {
         include $this->filePath;
     }

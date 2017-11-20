@@ -14,7 +14,7 @@ class View extends AbstractCompositeView
     /**
      * {@inheritdoc}
      */
-    public function render()
+    public function render(): void
     {
         include $this->filePath;
     }

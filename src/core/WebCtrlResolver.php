@@ -32,8 +32,8 @@ class WebCtrlResolver extends AbstractCtrlResolver
     protected function createCtrl(): AbstractCtrl
     {
         $view              = ViewFactory::createView(
-            $this->ctrlName,
-            str_replace('action', '', $this->actionName)
+            str_replace('action', '', $this->actionName),
+            $this->ctrlName
         );
         $componentsRootMap = AppHelper::getInstance()->getConfig('componentsRootMap');
         if (!isset($componentsRootMap['controllers'])) {

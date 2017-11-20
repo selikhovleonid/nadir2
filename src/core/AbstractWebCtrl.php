@@ -65,7 +65,7 @@ abstract class AbstractWebCtrl extends AbstractCtrl
      */
     protected function setView($sCtrlName, $sActionName)
     {
-        $this->view = ViewFactory::createView($sCtrlName, $sActionName);
+        $this->view = ViewFactory::createView($sActionName, $sCtrlName);
         if (!is_null($this->layout)) {
             $this->layout->view = $this->view;
         }

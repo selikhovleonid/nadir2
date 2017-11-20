@@ -16,20 +16,20 @@ class Layout extends AbstractCompositeView
     /**
      * It assigns the oblect of current class with the file of Layout and indirectly
      * (through the View object) with the file of view markup.
-     * @param string $sLayoutFilePath The path to the file with the layout markup.
-     * @param \nadir2\core\View|null $oView The object of view.
+     * @param string $layoutFilePath The path to the file with the layout markup.
+     * @param \nadir2\core\View $view The object of view.
      */
-    public function __construct($sLayoutFilePath, View $oView)
+    public function __construct(string $layoutFilePath, View $view)
     {
-        parent::__construct($sLayoutFilePath);
-        $this->view = $oView;
+        parent::__construct($layoutFilePath);
+        $this->view = $view;
     }
 
     /**
      * The method returns the view object binded with the layout.
      * @return \nadir2\core\View|null
      */
-    public function getView()
+    public function getView(): ?View
     {
         return $this->view;
     }
@@ -37,7 +37,7 @@ class Layout extends AbstractCompositeView
     /**
      * {@inheritdoc}
      */
-    public function render()
+    public function render(): void
     {
         include $this->filePath;
     }
