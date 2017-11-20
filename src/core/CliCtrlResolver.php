@@ -26,8 +26,7 @@ class CliCtrlResolver extends AbstractCtrlResolver
             ."The route wasn't passed as first param when the cli script was called.");
         }
         $this->requestRoute = (string) $args[1];
-        unset($args[0]);
-        unset($args[1]);
+        unset($args[0], $args[1]);
         $this->actionArgs   = array_values($args);
     }
 
@@ -36,7 +35,8 @@ class CliCtrlResolver extends AbstractCtrlResolver
      */
     protected function createCtrl(): AbstractCtrl
     {
-        $componentsRootMap = AppHelper::getInstance()->getConfig('componentsRootMap');
+        $componentsRootMap = AppHelper::getInstance()
+            ->getConfig('componentsRootMap');
         if (!isset($componentsRootMap['controllers'])) {
             throw new Exception("The field 'componentsRootMap.controllers' must be "
             ."presented in the main configuration file.");
