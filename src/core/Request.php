@@ -99,7 +99,7 @@ class Request
      * @param string $name
      * @return string|null
      */
-    public function getHeaderByName(string $name): ?string
+    public function getHeader(string $name): ?string
     {
         $name = strtolower($name);
         foreach ($this->getAllHeaders() as $key => $value) {
