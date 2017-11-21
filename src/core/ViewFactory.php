@@ -33,9 +33,9 @@ class ViewFactory
         $viewsRoot = AppHelper::getInstance()->getComponentRoot('views');
         $addPath   = '';
         if (!empty($ctrlName)) {
-            $addPath .= DIRECTORY_SEPARATOR.strtolower($ctrlName);
+            $addPath .= \DIRECTORY_SEPARATOR.strtolower($ctrlName);
         }
-        $viewFile = $viewsRoot.$addPath.DIRECTORY_SEPARATOR
+        $viewFile = $viewsRoot.$addPath.\DIRECTORY_SEPARATOR
             .strtolower($actionName).'.php';
         if (is_readable($viewFile)) {
             return new View($viewFile);
@@ -53,7 +53,7 @@ class ViewFactory
     public static function createLayout(string $layoutName, View $view): ?Layout
     {
         $layoutsRoot = AppHelper::getInstance()->getComponentRoot('layouts');
-        $layoutFile  = $layoutsRoot.DIRECTORY_SEPARATOR
+        $layoutFile  = $layoutsRoot.\DIRECTORY_SEPARATOR
             .strtolower($layoutName).'.php';
         if (is_readable($layoutFile)) {
             return new Layout($layoutFile, $view);
@@ -70,7 +70,7 @@ class ViewFactory
     public static function createSnippet(string $snptName): ?Snippet
     {
         $snptRoot = AppHelper::getInstance()->getComponentRoot('snippets');
-        $snptFile  = $snptRoot.DIRECTORY_SEPARATOR
+        $snptFile  = $snptRoot.\DIRECTORY_SEPARATOR
             .strtolower($snptName).'.php';
         if (is_readable($snptFile)) {
             return new Snippet($snptFile);
