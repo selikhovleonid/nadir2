@@ -8,12 +8,6 @@ namespace nadir2\core;
  */
 class Request
 {
-    /** @var array It contains the superglobal array $_SERVER */
-    private $serverMap = array();
-
-    /** @var array It contains the superglobal array $_REQUEST. */
-    private $requestMap = array();
-
     /** @var array It contains the raw request body. */
     private $rawBody = null;
 
@@ -23,46 +17,93 @@ class Request
      */
     public function __construct()
     {
-        $this->serverMap  = $_SERVER;
-        $this->requestMap = $_REQUEST;
         $this->rawBody    = @file_get_contents('php://input');
+    }
+
+    /**
+     * The method returns the server parameter value by the key. It's wrapper over
+     * the filter_var() function.
+     * @param string $name Name of a variable to get.
+     * @param int $filter
+     * @param mixed $options Associative array of options or bitwise disjunction
+     * of flags. If filter accepts options, flags can be provided in "flags"
+     * field of array.
+     * @return mixed Value of the requested variable on success, false if the filter
+     * fails, or null if the variable is not set.
+     */
+    public function getServerParam(
+        string $name,
+        int $filter = \FILTER_DEFAULT,
+        $options = null
+    ) {
+        // May be useful if FastCGI has strange side-effects with unexpected null
+        // values when using INPUT_SERVER and INPUT_ENV with this function.
+        //return isset($_SERVER[$name]) ? \filter_var($_SERVER[$name], $filter, $options)
+        //    : null;
+        return filter_input(\INPUT_SERVER, $name, $filter, $options);
+    }
+
+    /**
+     * The method returns the raw body of the request as string, which was gotten
+     * from the input stream.
+     * @return string.
+     */
+    public function getRawBody(): string
+    {
+        return $this->rawBody;
+    }
+
+    /**
+     * The method returns the parameter value of request by the passed key. It's
+     * wrapper over the filter_var() function.
+     * @param string $name Name of a variable to get.
+     * @param int $filter
+     * @param mixed $options Associative array of options or bitwise disjunction
+     * of flags. If filter accepts options, flags can be provided in "flags"
+     * field of array.
+     * @return mixed Value of the requested variable on success, false if the filter
+     * fails, or null if the variable is not set.
+     */
+    public function getParam(
+        string $name,
+        int $filter = \FILTER_DEFAULT,
+        $options = null
+    ) {
+        return isset($_REQUEST[$name]) ? \filter_var($_REQUEST[$name], $filter, $options)
+            : null;
     }
 
     /**
      * It returns the request HTTP-method.
      * @return string|null
      */
-    public function getMethod()
+    public function getMethod(): ?string
     {
-        return isset($this->serverMap['REQUEST_METHOD']) ? $this->serverMap['REQUEST_METHOD']
-                : null;
+        return $this->getServerParam('REQUEST_METHOD', \FILTER_SANITIZE_STRING);
     }
 
     /**
      * It returns the array of request headers.
      * @return string[]
      */
-    public function getHeaders()
+    public function getAllHeaders()
     {
-        // for apache2 only method
         return getallheaders();
     }
 
     /**
      * It returns the header by passed name. The search is case-insensitive.
-     * @param string $sName
+     * @param string $name
      * @return string|null
      */
-    public function getHeaderByName($sName)
+    public function getHeaderByName(string $name): ?string
     {
-        $mRes = null;
-        foreach ($this->getHeaders() as $sKey => $sValue) {
-            if (strtolower($sKey) === strtolower($sName)) {
-                $mRes = $sValue;
-                break;
+        foreach ($this->getAllHeaders() as $name => $value) {
+            if (strtolower($name) === strtolower($name)) {
+                return $value;
             }
         }
-        return $mRes;
+        return null;
     }
 
     /**
@@ -86,68 +127,25 @@ class Request
     }
 
     /**
-     * The method returns the raw body of the request as string, which was gotten
-     * from the input stream.
-     * @return string.
-     */
-    public function getRawBody()
-    {
-        return $this->rawBody;
-    }
-
-    /**
      * It returns trhe URL path of the request.
      * @return string|null
      */
-    public function getUrlPath()
+    public function getUrlPath(): ?string
     {
-        if (isset($this->serverMap['REQUEST_URI'])) {
-            $sUri = $this->serverMap['REQUEST_URI'];
-            $aUri = explode('?', $sUri);
-            $mRes = $aUri[0];
-        } else {
-            $mRes = null;
+        $uri = $this->getServerParam('REQUEST_URI', \FILTER_SANITIZE_URL);
+        if (!is_null($uri)) {
+            return \explode('?', $uri)[0];
         }
-        return $mRes;
-    }
-
-    /**
-     * The method returns the string values of request by key or whole request
-     * string as array.
-     * @param string $sKey It's empty string by default.
-     * @return mixed.
-     */
-    public function getParam($sKey = '')
-    {
-        if (empty($sKey)) {
-            return $this->requestMap;
-        } else {
-            return isset($this->requestMap[$sKey]) ? $this->requestMap[$sKey] : null;
-        }
-    }
-
-    /**
-     * The method returns the server parameter value by the key (from superglobal
-     * array $_SERVER) or the full array.
-     * @param string $sKey It's empty string by default.
-     * @return mixed.
-     */
-    public function getServerParam($sKey = '')
-    {
-        if (empty($sKey)) {
-            return $this->serverMap;
-        } else {
-            return isset($this->serverMap[$sKey]) ? $this->serverMap[$sKey] : null;
-        }
+        return null;
     }
 
     /**
      * It checks if the request is an ajax request.
      * @return boolean.
      */
-    public function isAjax()
+    public function isAjax(): bool
     {
-        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH'])
-            == 'xmlhttprequest';
+        $param = $this->getServerParam('HTTP_X_REQUESTED_WITH', \FILTER_SANITIZE_STRING);
+        return !is_null($param) && strtolower($param) === 'xmlhttprequest';
     }
 }
