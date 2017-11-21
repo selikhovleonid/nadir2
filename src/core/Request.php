@@ -22,7 +22,7 @@ class Request
 
     /**
      * The method returns the server parameter value by the key. It's wrapper over
-     * the filter_var() function.
+     * the filter_input() function.
      * @param string $name Name of a variable to get.
      * @param int $filter
      * @param mixed $options Associative array of options or bitwise disjunction
@@ -38,7 +38,7 @@ class Request
     ) {
         // May be useful if FastCGI has strange side-effects with unexpected null
         // values when using INPUT_SERVER and INPUT_ENV with this function.
-        //return isset($_SERVER[$name]) ? \filter_var($_SERVER[$name], $filter, $options)
+        //return isset($_SERVER[$name]) ? filter_var($_SERVER[$name], $filter, $options)
         //    : null;
         return filter_input(\INPUT_SERVER, $name, $filter, $options);
     }
@@ -46,9 +46,9 @@ class Request
     /**
      * The method returns the raw body of the request as string, which was gotten
      * from the input stream.
-     * @return string.
+     * @return string|null.
      */
-    public function getRawBody(): string
+    public function getRawBody(): ?string
     {
         return $this->rawBody;
     }
@@ -69,7 +69,10 @@ class Request
         int $filter = \FILTER_DEFAULT,
         $options = null
     ) {
-        return isset($_REQUEST[$name]) ? \filter_var($_REQUEST[$name], $filter, $options)
+        // May be useful when INPUT_REQUEST is implemented for the filter_input()
+        // function.
+        //return filter_input(\INPUT_REQUEST, $name, $filter, $options);
+        return isset($_REQUEST[$name]) ? filter_var($_REQUEST[$name], $filter, $options)
             : null;
     }
 
@@ -98,8 +101,9 @@ class Request
      */
     public function getHeaderByName(string $name): ?string
     {
-        foreach ($this->getAllHeaders() as $name => $value) {
-            if (strtolower($name) === strtolower($name)) {
+        $name = strtolower($name);
+        foreach ($this->getAllHeaders() as $key => $value) {
+            if (strtolower($key) === $name) {
                 return $value;
             }
         }
@@ -107,34 +111,36 @@ class Request
     }
 
     /**
-     * The method returns the associated array of cookies.
-     * @return array.
+     * It returns cookie value by name if it exists and matches predefined filter.
+     * @param string $name Cookie name.
+     * @return string|false|null
      */
-    public function getCookies()
+    public function getCookie(string $name)
     {
-        $mRes       = null;
-        $mRawCookie = $this->getHeaderByName('Cookie');
-        if (!is_null($mRawCookie)) {
-            $aCookies = explode(';', $mRawCookie);
-            foreach ($aCookies as $sCookie) {
-                $aParts = explode('=', $sCookie);
-                if (count($aParts) > 1) {
-                    $mRes[trim($aParts[0])] = trim($aParts[1]);
-                }
-            }
-        }
-        return $mRes;
+        return filter_input(\INPUT_COOKIE, $name, \FILTER_SANITIZE_STRING);
     }
 
     /**
-     * It returns trhe URL path of the request.
+     * The method returns the associated array of cookies.
+     * @return mixed[]|null
+     */
+    public function getAllCookies(): ?array
+    {
+        return filter_input_array(\INPUT_COOKIE, array_combine(
+            array_keys($_COOKIE),
+            array_fill(0, count($_COOKIE), \FILTER_SANITIZE_STRING)
+        ));
+    }
+
+    /**
+     * It returns the URL path of the request.
      * @return string|null
      */
     public function getUrlPath(): ?string
     {
         $uri = $this->getServerParam('REQUEST_URI', \FILTER_SANITIZE_URL);
         if (!is_null($uri)) {
-            return \explode('?', $uri)[0];
+            return parse_url($uri, \PHP_URL_PATH);
         }
         return null;
     }
