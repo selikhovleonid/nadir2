@@ -177,7 +177,7 @@ class Headers implements RunnableInterface
      * The method returns true if the the page headers were set.
      * @return boolean.
      */
-    public function wasRan(): bool
+    public function isRan(): bool
     {
         return $this->isRan;
     }
