@@ -115,6 +115,15 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
     }
 
     /**
+     * The method returns the whole set of application configurations.
+     * @return array
+     */
+    public function getAllConfigs(): array
+    {
+        return $this->getConfig();
+    }
+
+    /**
      * It determines the basic site URL.
      * @return string|null
      */
