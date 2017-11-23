@@ -12,176 +12,177 @@ const SPACES_PER_TAB = 4;
 /**
  * It returns of string representation of array at the current level of the
  * tree. It's recursive method.
- * @param mixed $mVar The variable.
- * @param int $nDepth Optional The max depth of tree print.
- * @param int $nLevel Optional The current level of the tree.
- * @param mixed[] $aObjects Optional The array of variable ojects.
- * @return string.
+ * @param mixed $var The variable.
+ * @param int $depth Optional The max depth of tree print.
+ * @param int $level Optional The current level of the tree.
+ * @param mixed[] $objects Optional The array of variable ojects.
+ * @return string
  */
 function _getDumpArrayIteration(
-    $mVar,
-    $nDepth = 10,
-    $nLevel = 0,
-    array& $aObjects = array()
-) {
-    $sOut       = '';
-    $sSpacesOut = str_repeat(' ', SPACES_PER_TAB * $nLevel);
-    if ($nDepth <= $nLevel) {
-        $sOut .= "array\n{$sSpacesOut}(...)";
-    } elseif (empty($mVar)) {
-        $sOut .= 'array()';
+    $var,
+    int $depth = 10,
+    int $level = 0,
+    array& $objects = []
+): string {
+    $out       = '';
+    $spacesOut = str_repeat(' ', SPACES_PER_TAB * $level);
+    if ($depth <= $level) {
+        $out .= "array\n{$spacesOut}(...)";
+    } elseif (empty($var)) {
+        $out .= 'array()';
     } else {
-        $sSpacesIn = $sSpacesOut.str_repeat(' ', SPACES_PER_TAB);
-        $sOut      .= "array\n{$sSpacesOut}(";
-        foreach ($mVar as $sKey => $mValue) {
-            $sOut .= "\n{$sSpacesIn}"
-                ._getDumpIteration($sKey, $nDepth, 0, $aObjects)
+        $spacesIn = $spacesOut.str_repeat(' ', SPACES_PER_TAB);
+        $out      .= "array\n{$spacesOut}(";
+        foreach ($var as $key => $value) {
+            $out .= "\n{$spacesIn}"
+                ._getDumpIteration($key, $depth, 0, $objects)
                 .' => '
-                ._getDumpIteration($mValue, $nDepth, $nLevel + 1, $aObjects);
+                ._getDumpIteration($value, $depth, $level + 1, $objects);
         }
-        $sOut .= "\n{$sSpacesOut})";
+        $out .= "\n{$spacesOut})";
     }
-    return $sOut;
+    return $out;
 }
 
 /**
  * It returns the string representation of object at the current level of the
  * tree. It's recursive method.
- * @param mixed $mVar The variable.
- * @param int $nDepth Optional The max depth of tree print.
- * @param int $nLevel Optional The current level of the tree.
- * @param mixed[] $aObjects Optional The array of variable ojects.
- * @return string.
+ * @param mixed $var The variable.
+ * @param int $depth Optional The max depth of tree print.
+ * @param int $level Optional The current level of the tree.
+ * @param mixed[] $objects Optional The array of variable ojects.
+ * @return string
  */
 function _getDumpObjIteration(
-    $mVar,
-    $nDepth = 10,
-    $nLevel = 0,
-    array& $aObjects = array()
-) {
-    $sOut       = '';
-    $sClassName = get_class($mVar);
-    $sSpacesOut = str_repeat(' ', SPACES_PER_TAB * $nLevel);
-    if (($iObj       = array_search($mVar, $aObjects, true)) !== false) {
-        $sOut .= "{$sClassName} object #"
-            .($iObj + 1)
-            ."\n{$sSpacesOut}(...)";
-    } elseif ($nDepth <= $nLevel) {
-        $sOut .= "{$sClassName} object"
-            ."\n{$sSpacesOut}(...)";
+    $var,
+    int $depth = 10,
+    int $level = 0,
+    array& $objects = []
+): string {
+    $out       = '';
+    $className = get_class($var);
+    $spacesOut = str_repeat(' ', SPACES_PER_TAB * $level);
+    if (($objId       = array_search($var, $objects, true)) !== false) {
+        $out .= "{$className} object #"
+            .($objId + 1)
+            ."\n{$spacesOut}(...)";
+    } elseif ($depth <= $level) {
+        $out .= "{$className} object"
+            ."\n{$spacesOut}(...)";
     } else {
         // Возвращает модификаторы свойств объекта.
-        $funcGetPropMod = function (\ReflectionProperty $oProp) {
-            if ($oProp->isPublic()) {
-                $sOut = 'public';
-            } elseif ($oProp->isProtected()) {
-                $sOut = 'protected';
+        $funcGetPropMod = function (\ReflectionProperty $prop) {
+            if ($prop->isPublic()) {
+                $out = 'public';
+            } elseif ($prop->isProtected()) {
+                $out = 'protected';
             } else {
-                $sOut = 'private';
+                $out = 'private';
             }
-            if ($oProp->isStatic()) {
-                $sOut .= ' static';
+            if ($prop->isStatic()) {
+                $out .= ' static';
             }
-            return $sOut;
+            return $out;
         };
 
-        $iObj        = array_push($aObjects, $mVar);
-        $sSpacesIn   = $sSpacesOut.str_repeat(' ', SPACES_PER_TAB);
-        $oReflection = new \ReflectionClass($sClassName);
-        $aProps      = $oReflection->getProperties();
-        $sOut        .= "{$sClassName} object #{$iObj}\n{$sSpacesOut}(";
-        foreach ($aProps as $oProp) {
-            $oProp->setAccessible(true);
-            $sOut .= "\n{$sSpacesIn}"
+        $objId        = array_push($objects, $var);
+        $spacesIn   = $spacesOut.str_repeat(' ', SPACES_PER_TAB);
+        $reflection = new \ReflectionClass($className);
+        $props      = $reflection->getProperties();
+        $out        .= "{$className} object #{$objId}\n{$spacesOut}(";
+        foreach ($props as $prop) {
+            $prop->setAccessible(true);
+            $out .= "\n{$spacesIn}"
                 .'['
-                ._getDumpIteration($oProp->getName(), $nDepth, 0, $aObjects)
-                .':'.$funcGetPropMod($oProp)
+                ._getDumpIteration($prop->getName(), $depth, 0, $objects)
+                .':'.$funcGetPropMod($prop)
                 .'] => '
                 ._getDumpIteration(
-                    $oProp->getValue($mVar),
-                    $nDepth,
-                    $nLevel + 1,
-                    $aObjects
+                    $prop->getValue($var),
+                    $depth,
+                    $level + 1,
+                    $objects
                 );
-            if (!$oProp->isPublic()) {
-                $oProp->setAccessible(false);
+            if (!$prop->isPublic()) {
+                $prop->setAccessible(false);
             }
         }
-        $sOut .= "\n{$sSpacesOut})";
+        $out .= "\n{$spacesOut})";
         unset($funcGetPropMod);
-        unset($oReflection);
+        unset($reflection);
     }
-    return $sOut;
+    return $out;
 }
 
 /**
  * The method returns the string representation of current level of the tree.
  * It's recursive.
- * @param mixed $mVar The variable.
- * @param int $nDepth Optional The max depth of tree print.
- * @param int $nLevel Optional The current level of the tree.
- * @param mixed[] $aObjects Optional The array of variable ojects.
- * @return string.
+ * @param mixed $var The variable.
+ * @param int $depth Optional The max depth of tree print.
+ * @param int $level Optional The current level of the tree.
+ * @param mixed[] $objects Optional The array of variable ojects.
+ * @return string
  */
 function _getDumpIteration(
-    $mVar,
-    $nDepth = 10,
-    $nLevel = 0,
-    array& $aObjects = array()
-) {
-    $sOut = '';
-    switch (gettype($mVar)) {
+    $var,
+    int $depth = 10,
+    int $level = 0,
+    array& $objects = []
+): string {
+    $out = '';
+    switch (gettype($var)) {
         case 'NULL':
-            $sOut .= 'NULL';
+            $out .= 'NULL';
             break;
         case 'boolean':
-            $sOut .= $mVar ? 'TRUE' : 'FALSE';
+            $out .= $var ? 'TRUE' : 'FALSE';
             break;
         case 'integer':
         case 'double':
-            $sOut .= (string) $mVar;
+            $out .= (string) $var;
             break;
         case 'string':
-            $sOut .= "'".addslashes($mVar)."'";
+            $out .= "'".addslashes($var)."'";
             break;
         case 'unknown type':
-            $sOut .= '{unknown}';
+            $out .= '{unknown}';
             break;
         case 'resource':
-            $sOut .= '{resource}';
+            $out .= '{resource}';
             break;
         case 'array':
-            $sOut .= _getDumpArrayIteration($mVar, $nDepth, $nLevel, $aObjects);
+            $out .= _getDumpArrayIteration($var, $depth, $level, $objects);
             break;
         case 'object':
-            $sOut .= _getDumpObjIteration($mVar, $nDepth, $nLevel, $aObjects);
+            $out .= _getDumpObjIteration($var, $depth, $level, $objects);
             break;
         default:
             break;
     }
-    return $sOut;
+    return $out;
 }
 
 /**
  * It returns the human-readable data of the variable (the variable dump).
- * @param mixed $mVar The variable.
- * @param integer $nDepth Optional The max depth of tree print.
- * @return string.
+ * @param mixed $var The variable.
+ * @param integer $depth Optional The max depth of tree print.
+ * @return string
  */
-function getDumpVar($mVar, $nDepth = 10)
+function getDumpVar($var, int $depth = 10): string
 {
-    return _getDumpIteration($mVar, $nDepth);
+    return _getDumpIteration($var, $depth);
 }
 
 /**
  * It prints the human-readable data of the variable (the variable dump) with
  * highlighted syntax.
- * @param mixed $mVar The variable.
- * @param integer $nDepth Optional The max depth of tree print.
+ * @param mixed $var The variable.
+ * @param integer $depth Optional The max depth of tree print.
+ * @return void
  */
-function dumpVar($mVar, $nDepth = 10)
+function dumpVar($var, int $depth = 10): void
 {
-    $sOut = getDumpVar($mVar, $nDepth);
-    $sRaw = highlight_string("<?php\n{$sOut}", true);
-    echo preg_replace('#&lt;\?php<br \/>#', '', $sRaw, 1);
+    $out = getDumpVar($var, $depth);
+    $raw = highlight_string("<?php\n{$out}", true);
+    echo preg_replace('#&lt;\?php<br \/>#', '', $raw, 1);
 }
