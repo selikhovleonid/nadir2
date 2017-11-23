@@ -6,15 +6,15 @@ namespace nadir2\core;
  * The class provides the processing of page headers.
  * @author Leonid Selikhov
  */
-class Headers
+class Headers implements RunnableInterface
 {
     /** @var self The singleton object of current class. */
     private static $instance = null;
 
-    /** @var string[] The headers of the page stack. */
-    protected $headerList = array();
+    /** @var string[] The stack of the page headers. */
+    protected $headerList = [];
 
-    /** @var boolean The flag is equal true when the page headers are set. */
+    /** @var boolean The flag is equal true when the page headers was set. */
     protected $isRan = false;
 
     /**
@@ -39,13 +39,13 @@ class Headers
 
     /**
      * It returns the human readable explanation of HTTP status code.
-     * @param integer $nCode The status code.
+     * @param integer $code The status code.
      * @return string The description.
-     * @throws \core\Exception It throws if unknown HTTP code was passed.
+     * @throws \nadir2\core\Exception It's throwen if unknown HTTP code was passed.
      */
-    public static function getHTTPExplanationByCode($nCode)
+    public static function getHTTPExplanationByCode(int $code): string
     {
-        switch ((int) $nCode) {
+        switch ((int) $code) {
             case 100:
                 return 'Continue';
             case 101:
@@ -109,7 +109,9 @@ class Headers
             case 415:
                 return 'Unsupported Media Type';
             case 429:
-                return 'Stop spam';
+                return 'Too Many Requests';
+            case 451:
+                return 'Unavailable For Legal Reasons';
             case 500:
                 return 'Internal Server Error';
             case 501:
@@ -121,7 +123,7 @@ class Headers
             case 504:
                 return 'Gateway Time-out';
             case 505:
-                return 'HTTP Version not supported';
+                return 'HTTP Version Not Supported';
             default:
                 throw new Exception('Unknown HTTP code');
         }
@@ -129,32 +131,36 @@ class Headers
 
     /**
      * It adds the header to the stack.
-     * @param string $sHeader The page header.
+     * @param string $header The page header.
      * @return self.
-     * @throws \core\Exception It throws if passed header was already added earlier.
+     * @throws \nadir2\core\Exception It's throwen if the passed header has already
+     * been added earlier.
      */
-    public function add($sHeader)
+    public function add(string $header): self
     {
-        foreach ($this->headerList as $sTmp) {
-            if ($sTmp == $sHeader) {
-                throw new Exception("The '{$sHeader}' header has already been added.");
+        foreach ($this->getAll() as $tmp) {
+            if ($tmp === $header) {
+                throw new Exception("The '{$header}' header has already been added.");
             }
         }
-        $this->headerList[] = $sHeader;
+        $this->headerList[] = $header;
         return self::$instance;
     }
 
     /**
      * It adds the header to the stack by HTTP code.
-     * @param integer $nCode The code.
+     * @param integer $code The code.
      * @return self.
      */
-    public function addByHttpCode($nCode)
+    public function addByHttpCode(int $code): self
     {
-        $sProtocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL']
-                : 'HTTP/1.1';
-        $sHeader   = "{$sProtocol} {$nCode} "
-            .self::getHTTPExplanationByCode($nCode);
+        $serverProtocol = filter_input(
+            \INPUT_SERVER,
+            'SERVER_PROTOCOL',
+            \FILTER_SANITIZE_STRING
+        );
+        $protocol = !empty($serverProtocol) ? $serverProtocol : 'HTTP/1.1';
+        $sHeader   = "{$protocol} {$code} ".self::getHTTPExplanationByCode($code);
         return $this->add($sHeader);
     }
 
@@ -162,7 +168,7 @@ class Headers
      * The method returns the stack of page headers.
      * @return string[].
      */
-    public function getAll()
+    public function getAll(): array
     {
         return $this->headerList;
     }
@@ -171,7 +177,7 @@ class Headers
      * The method returns true if the the page headers were set.
      * @return boolean.
      */
-    public function isRan()
+    public function wasRan(): bool
     {
         return $this->isRan;
     }
@@ -180,11 +186,11 @@ class Headers
      * The main execution method. It sets all added headers into the page.
      * @return void.
      */
-    public function run()
+    public function run(): void
     {
         $this->isRan = true;
-        foreach ($this->headerList as $sHeader) {
-            header($sHeader);
+        foreach ($this->getAll() as $header) {
+            header($header);
         }
     }
 }
