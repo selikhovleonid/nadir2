@@ -17,7 +17,7 @@ class Request
      */
     public function __construct()
     {
-        $this->rawBody    = @file_get_contents('php://input');
+        $this->rawBody = @file_get_contents('php://input');
     }
 
     /**
@@ -36,7 +36,7 @@ class Request
         int $filter = \FILTER_DEFAULT,
         $options = null
     ) {
-        // May be useful if FastCGI has strange side-effects with unexpected null
+        // Can be useful if FastCGI has strange side-effects with unexpected null
         // values when using INPUT_SERVER and INPUT_ENV with this function.
         //return isset($_SERVER[$name]) ? filter_var($_SERVER[$name], $filter, $options)
         //    : null;
@@ -69,7 +69,7 @@ class Request
         int $filter = \FILTER_DEFAULT,
         $options = null
     ) {
-        // May be useful when INPUT_REQUEST is implemented for the filter_input()
+        // Can be useful when INPUT_REQUEST is implemented for the filter_input()
         // function.
         //return filter_input(\INPUT_REQUEST, $name, $filter, $options);
         return isset($_REQUEST[$name]) ? filter_var($_REQUEST[$name], $filter, $options)
