@@ -129,10 +129,16 @@ class AppHelper extends AbstractAutoAccessors implements RunnableInterface
      */
     private static function getBaseUrl(): ?string
     {
-        if (isset($_SERVER['SERVER_NAME'])) {
-            $protocol = !empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS'])
-                == 'on' ? 'https' : 'http';
-            return $protocol.'://'.$_SERVER['SERVER_NAME'];
+        $serverName = filter_input(
+            \INPUT_SERVER,
+            'SERVER_NAME',
+            \FILTER_SANITIZE_STRING
+        );
+        if (!empty($serverName)) {
+            $https = filter_input(\INPUT_SERVER, 'HTTPS', \FILTER_SANITIZE_STRING);
+            $protocol = !empty($https) && strtolower($https) === 'on' ? 'https'
+                : 'http';
+            return $protocol.'://'.$serverName;
         }
         return null;
     }
