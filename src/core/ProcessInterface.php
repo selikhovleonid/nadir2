@@ -13,5 +13,5 @@ interface ProcessInterface extends RunnableInterface
      * It stops and/or kills the process.
      * @return void.
      */
-    public function stop();
+    public function stop(): void;
 }
