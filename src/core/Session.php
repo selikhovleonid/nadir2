@@ -19,51 +19,52 @@ class Session implements ArrayCollectionInterface
 
     /**
      * It returns the current ident of session.
-     * @return string Id сессии.
+     * @return string The session id.
      */
-    public function getId()
+    public function getId(): string
     {
         return session_id();
     }
 
     /**
      * It checks if the session was started.
-     * @return boolean.
+     * @return boolean
      */
-    public function isStarted()
+    public function isStarted(): bool
     {
         return $this->getId() !== '';
     }
 
     /**
      * It sets the ident of current session.
-     * @param string $iSess The swssion id.
-     * @return void.
+     * @param string $sessionId
+     * @return void
      */
-    public function setId($iSess)
+    public function setId(string $sessionId): void
     {
-        @session_id($iSess);
+        @session_id($sessionId);
     }
 
     /**
      * It returns the name of current session.
-     * @return string.
+     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return session_name();
     }
 
     /**
      * The method sets the name of current session.
-     * @param string $sName By default it's PHPSESSID.
-     * @throws Exception It throws if passed name consists digits only or is empty.
+     * @param string $name By default it's PHPSESSID.
+     * @return void
+     * @throws Exception It's throwen if passed name consists digits only or is empty.
      */
-    public function setName($sName)
+    public function setName(string $name): void
     {
-        if (!empty($sName)) {
-            if (!is_numeric($sName)) {
-                @session_name($sName);
+        if (!empty($name)) {
+            if (!is_numeric($name)) {
+                @session_name($name);
             } else {
                 throw new Exception('The session name can\'t consist only of digits, '
                 .'at least one letter must be presented.');
@@ -75,28 +76,28 @@ class Session implements ArrayCollectionInterface
 
     /**
      * It inits the data of new session or continues the current session.
-     * @param string $sSessName The optional name of session, it has higher priority
+     * @param string $name The optional name of session, it has higher priority
      * than the $iSess parameter.
-     * @param string $iSess The optional session ident. It ignored if the $sSessName
+     * @param string $sessionId The optional session ident. It ignored if the $sSessName
      * parameter was passed.
      * @return string The id of current session.
      */
-    public function start($sSessName = null, $iSess = null)
+    public function start(?string $name = null, ?string $sessionId = null): string
     {
         if (!$this->isStarted()) {
-            if (!is_null($sSessName)) {
-                $this->setName($sSessName);
+            if (!is_null($name)) {
+                $this->setName($name);
             }
-            @session_start($iSess);
+            @session_start($sessionId);
         };
         return $this->getId();
     }
 
     /**
      * It commits the data of session and closes it.
-     * @return void|null.
+     * @return void
      */
-    public function commit()
+    public function commit(): void
     {
         if ($this->isStarted()) {
             session_commit();
@@ -107,115 +108,113 @@ class Session implements ArrayCollectionInterface
      * It destroys the session data.
      * @return boolean|null The result of destruction.
      */
-    public function destroy()
+    public function destroy(): ?bool
     {
-        $mRes = null;
         if ($this->isStarted()) {
             @session_unset();
-            $mRes = session_destroy();
+            return session_destroy();
         }
-        return $mRes;
+        return null;
     }
 
     /**
      * It complitly destroys session with cookie.
      * @return boolean|null The result.
      */
-    public function destroyWithCookie()
+    public function destroyWithCookie(): ?bool
     {
-        $mRes = null;
         if ($this->isStarted()) {
             $this->destroy();
-            $mRes = setcookie($this->getName(), '', time() - 1, '/');
+            return setcookie($this->getName(), '', time() - 1, '/');
         }
-        return $mRes;
+        return null;
     }
 
     /**
      * It adds the variable to the session.
-     * @param string $sKey The name of variable.
-     * @param mixed $mValue The value of it.
+     * @param string $key The name of variable.
+     * @param mixed $value The value of it.
      * @return void.
      */
-    public function add($sKey, $mValue)
+    public function add(string $key, $value): void
     {
-        $_SESSION[$sKey] = $mValue;
+        $_SESSION[$key] = $value;
     }
 
     /**
      * It adds the array of variables (the key-value pairs) to the session.
-     * @param array $aData
-     * @return void.
+     * @param array $pairs
+     * @return void
      */
-    public function addAll(array $aPairs)
+    public function addAll(array $pairs): void
     {
-        foreach ($aPairs as $sKey => $mValue) {
-            $this->add($sKey, $mValue);
+        foreach ($pairs as $key => $value) {
+            $this->add($key, $value);
         }
     }
 
     /**
      * It returns TRUE if the variable with passed key contains into the session.
-     * @param string $sKey.
-     * @return boolean.
+     * @param string $key
+     * @return boolean
      */
-    public function contains($sKey)
+    public function contains(string $key): bool
     {
-        return isset($_SESSION[$sKey]);
+        return isset($_SESSION[$key]);
     }
 
     /**
-     * It returns TRUE if the session is empty.
-     * @return boolean.
+     * It returns true if the session is empty.
+     * @return boolean
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return empty($_SESSION);
     }
 
     /**
      * It returns the variable of session value by passed key.
-     * @param string $sKey.
+     * @param string $key
      * @return mixed|null.
      */
-    public function get($sKey)
+    public function get(string $key)
     {
-        return $this->contains($sKey) ? $_SESSION[$sKey] : null;
+        return $this->contains($key) ? $_SESSION[$key] : null;
     }
 
     /**
      * It returns the list of session variables.
-     * @return string [].
+     * @return string[]
      */
-    public function getKeys()
+    public function getKeys(): array
     {
         return array_keys($_SESSION);
     }
 
     /**
      * It returns all session variables as associative array.
-     * @return mixed[].
+     * @return mixed[]
      */
-    public function getAll()
+    public function getAll(): array
     {
-        $aRes = array();
-        foreach ($this->getKeys() as $sKey) {
-            $aRes[$sKey] = $this->get($sKey);
+        $res = [];
+        foreach ($this->getKeys() as $key) {
+            $res[$key] = $this->get($key);
         }
-        return $aRes;
+        return $res;
     }
 
     /**
      * It removes the variable of session by passed key.
-     * @param string $sKey.
+     * @param string $key
      * @return mixed|null The removed variable value.
      */
-    public function remove($sKey)
+    public function remove(string $key)
     {
-        if ($this->contains($sKey)) {
-            $mRes = $_SESSION[$sKey];
-            unset($_SESSION[$sKey]);
-            return $mRes;
+        if ($this->contains($key)) {
+            $res = $_SESSION[$key];
+            unset($_SESSION[$key]);
+            return $res;
         } else {
             return null;
         }
@@ -225,20 +224,20 @@ class Session implements ArrayCollectionInterface
      * It clears the session by removing all stored variables.
      * @return mixed[] The array of removed vars.
      */
-    public function removeAll()
+    public function removeAll(): array
     {
-        $aRes = array();
-        foreach ($this->getKeys() as $sKey) {
-            $aRes[$sKey] = $this->remove($sKey);
+        $res = [];
+        foreach ($this->getKeys() as $key) {
+            $res[$key] = $this->remove($key);
         }
-        return $aRes;
+        return $res;
     }
 
     /**
-     * It returns the count of variables containing into the session.
-     * @return integer.
+     * It returns the count of variables contained into the session.
+     * @return integer
      */
-    public function size()
+    public function size(): int
     {
         return count($this->getKeys());
     }
