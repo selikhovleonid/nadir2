@@ -14,13 +14,13 @@ class Validator implements RunnableInterface
     protected $data = null;
 
     /** @var array Set of fields and their corresponding rules for validation. */
-    protected $items = array();
+    protected $items = [];
 
     /** @var array Set of validation rules. */
-    protected $rules = array();
+    protected $rules = [];
 
     /** @var array Stack of data errors which occured during the validation. */
-    protected $errors = array();
+    protected $errors = [];
 
     /** @var boolean Flag is equal true when the data is validated. */
     protected $isRan = false;
@@ -28,12 +28,12 @@ class Validator implements RunnableInterface
     /**
      * The constructor initializes the validator and also sets the input data for
      * validation.
-     * @param mixed[] $aData Input data.
+     * @param mixed[] $data Input data.
      */
-    public function __construct($aData)
+    public function __construct($data)
     {
-        if (is_array($aData)) {
-            $this->data = $aData;
+        if (is_array($data)) {
+            $this->data = $data;
             $this->init();
         } else {
             $this->isRan = true;
@@ -44,45 +44,45 @@ class Validator implements RunnableInterface
     /**
      * The method returns a tree element by a key, which is formed as a string
      * separated by points and reflecting the nesting hierarchy.
-     * @param mixed[] $aData Input tree.
-     * @param string $sKey The field name. The name of the nested field is formed by
+     * @param mixed[] $data Input tree.
+     * @param string $key The field name. The name of the nested field is formed by
      * the path of the tree the tiers of which are separated by the point.
-     * @return mixed.
-     * @throws \extensions\validator\Exception.
+     * @return mixed
+     * @throws \extensions\validator\Exception
      */
-    public static function getArrayItemByPointSeparatedKey(array & $aData, $sKey)
+    public static function getArrayItemByPointSeparatedKey(array& $data, string $key)
     {
-        if (strpos($sKey, '.') !== false) {
-            preg_match('/([a-zA-Z0-9_\-]+)\.([a-zA-Z0-9_\-\.]+)/', $sKey, $aKey);
-            if (!isset($aData[$aKey[1]])) {
-                throw new Exception('Undefined index: '.$aKey[1]);
+        if (strpos($key, '.') !== false) {
+            preg_match('/([a-zA-Z0-9_\-]+)\.([a-zA-Z0-9_\-\.]+)/', $key, $keys);
+            if (!isset($data[$keys[1]])) {
+                throw new Exception('Undefined index: '.$keys[1]);
             }
-            if (!is_array($aData[$aKey[1]])) {
-                throw new Exception("The element indexed {$aKey[1]} isn't an array.");
+            if (!is_array($data[$keys[1]])) {
+                throw new Exception("The element indexed {$keys[1]} isn't an array.");
             }
             return self::getArrayItemByPointSeparatedKey(
-                $aData[$aKey[1]],
-                $aKey[2]
+                $data[$keys[1]],
+                $keys[2]
             );
-        } elseif (isset($aData[$sKey])) {
-            return $aData[$sKey];
+        } elseif (isset($data[$key])) {
+            return $data[$key];
         } else {
-            throw new Exception('Undefined index: '.$sKey);
+            throw new Exception('Undefined index: '.$key);
         }
     }
 
     /**
      * The method checks if the input tree contains an element with the specified
      * index (the index contains a point-separator of tiers)
-     * @param mixed[] $aData Input tree.
-     * @param string $sKey The field name. The name of the nested field is formed by
+     * @param mixed[] $data Input tree.
+     * @param string $key The field name. The name of the nested field is formed by
      * the path of the tree the tiers of which are separated by the point.
-     * @return boolean.
+     * @return boolean
      */
-    public static function isIndexSet(array & $aData, $sKey)
+    public static function isIndexSet(array& $data, string $key): bool
     {
         try {
-            self::getArrayItemByPointSeparatedKey($aData, $sKey);
+            self::getArrayItemByPointSeparatedKey($data, $key);
             return true;
         } catch (Exception $e) {
             return false;
@@ -92,69 +92,63 @@ class Validator implements RunnableInterface
     /**
      * This method fills the validator with default set of rules (and options of rules)
      * such as rules for validating required fields, strings, numbers, arrays etc.
+     * @return void
      */
-    private function init()
+    private function init(): void
     {
-        $aData = $this->data;
+        $data = $this->data;
 
         $this
             // Required value rules
             ->addRule(
                 'required',
-                function ($sFieldName) use ($aData) {
-                    if (\nadir2\core\validator\Validator::isIndexSet(
-                        $aData,
-                        $sFieldName
-                    )) {
+                function (string $fieldName) use ($data): bool {
+                    if (self::isIndexSet($data, $fieldName)) {
                         return true;
                     }
                     return false;
                 },
-                function ($sFieldName) {
-                    return "Field '{$sFieldName}' is required.";
+                function ($fieldName): string {
+                    return "Field '{$fieldName}' is required.";
                 }
             )
             // String rules
             ->addRule(
                 'string',
-                function ($sFieldName, array $aOpt = array()) use ($aData) {
-                    if (\nadir2\core\validator\Validator::isIndexSet(
-                        $aData,
-                        $sFieldName
-                    )) {
-                        $mValue = \nadir2\core\validator\Validator
-                        ::getArrayItemByPointSeparatedKey($aData, $sFieldName);
-                        if (!is_string($mValue)) {
+                function (string $fieldName, array $options = []) use ($data): bool {
+                    if (self::isIndexSet($data, $fieldName)) {
+                        $value = self::getArrayItemByPointSeparatedKey($data, $fieldName);
+                        if (!is_string($value)) {
                             return false;
                         }
-                        if (isset($aOpt['notEmpty'])) {
-                            $mTmp = trim($mValue);
-                            if ($aOpt['notEmpty'] && empty($mTmp)) {
+                        if (isset($options['notEmpty'])) {
+                            $trimVal = trim($value);
+                            if ($options['notEmpty'] && empty($trimVal)) {
                                 return false;
                             }
-                            if (!$aOpt['notEmpty'] && !empty($mTmp)) {
-                                return false;
-                            }
-                        }
-                        if (isset($aOpt['pattern'])) {
-                            if (!preg_match($aOpt['pattern'], $mValue)) {
+                            if (!$options['notEmpty'] && !empty($trimVal)) {
                                 return false;
                             }
                         }
-                        if (isset($aOpt['length'])) {
-                            $nLength = mb_strlen($mValue, 'UTF-8');
-                            if (isset($aOpt['length']['min'])) {
-                                if ($nLength < $aOpt['length']['min']) {
+                        if (isset($options['pattern'])) {
+                            if (!preg_match($options['pattern'], $value)) {
+                                return false;
+                            }
+                        }
+                        if (isset($options['length'])) {
+                            $length = mb_strlen($value);
+                            if (isset($options['length']['min'])) {
+                                if ($length < $options['length']['min']) {
                                     return false;
                                 }
                             }
-                            if (isset($aOpt['length']['max'])) {
-                                if ($nLength > $aOpt['length']['max']) {
+                            if (isset($options['length']['max'])) {
+                                if ($length > $options['length']['max']) {
                                     return false;
                                 }
                             }
-                            if (isset($aOpt['length']['equal'])) {
-                                if ($nLength != $aOpt['length']['equal']) {
+                            if (isset($options['length']['equal'])) {
+                                if ($length != $options['length']['equal']) {
                                     return false;
                                 }
                             }
@@ -162,66 +156,61 @@ class Validator implements RunnableInterface
                     }
                     return true;
                 },
-                function ($sFieldName, array $aOpt = array()) {
-                    if (!empty($aOpt)) {
-                        $aKeys = array_keys($aOpt);
-                        $sKeys = implode(', ', $aKeys);
-                        return "Invalid string field '{$sFieldName}' value. "
-                        . "Validation options: {$sKeys}";
+                function (string $fieldName, array $options = []): string {
+                    if (!empty($options)) {
+                        $keys = implode(', ', array_keys($options));
+                        return "Invalid string field '{$fieldName}' value. "
+                        . "Validation options: {$keys}";
                     }
-                    return "Invalid string field '{$sFieldName}' value.";
+                    return "Invalid string field '{$fieldName}' value.";
                 }
             )
             // Number rules
             ->addRule(
                 'number',
-                function ($sFieldName, array $aOpt = array()) use ($aData) {
-                    if (\nadir2\core\validator\Validator::isIndexSet(
-                        $aData,
-                        $sFieldName
-                    )) {
-                        $mValue = \nadir2\core\validator\Validator
-                        ::getArrayItemByPointSeparatedKey($aData, $sFieldName);
-                        if (!is_numeric($mValue)) {
+                function (string $fieldName, array $options = []) use ($data): bool {
+                    if (self::isIndexSet($data, $fieldName)) {
+                        $value = self::getArrayItemByPointSeparatedKey($data, $fieldName);
+                        if (!is_numeric($value)) {
                             return false;
                         }
-                        if (isset($aOpt['float'])) {
-                            if ($aOpt['float'] && !is_float($mValue)) {
+                        if (isset($options['float'])) {
+                            if ($options['float'] && !is_float($value)) {
                                 return false;
                             }
-                            if (!$aOpt['float'] && is_float($mValue)) {
-                                return false;
-                            }
-                        }
-                        if (isset($aOpt['integer'])) {
-                            if ($aOpt['integer'] && !is_int($mValue)) {
-                                return false;
-                            }
-                            if (!$aOpt['integer'] && is_int($mValue)) {
+                            if (!$options['float'] && is_float($value)) {
                                 return false;
                             }
                         }
-                        if (isset($aOpt['positive'])) {
-                            if ($aOpt['positive'] && $mValue <= 0) {
+                        if (isset($options['integer'])) {
+                            if ($options['integer'] && !is_int($value)) {
                                 return false;
                             }
-                            if (!$aOpt['positive'] && $mValue >= 0) {
+                            if (!$options['integer'] && is_int($value)) {
                                 return false;
                             }
                         }
-                        if (isset($aOpt['value'])) {
-                            if (isset($aOpt['value']['equal'])) {
-                                if ($mValue != $aOpt['value']['equal']) {
+                        if (isset($options['positive'])) {
+                            if ($options['positive'] && $value <= 0) {
+                                return false;
+                            }
+                            if (!$options['positive'] && $value >= 0) {
+                                return false;
+                            }
+                        }
+                        if (isset($options['value'])) {
+                            if (isset($options['value']['equal'])) {
+                                if ($value != $options['value']['equal']) {
                                     return false;
                                 }
                             }
-                            if (isset($aOpt['value']['min'])) {
-                                if ($mValue < $aOpt['value']['min']) {
+                            if (isset($options['value']['min'])) {
+                                if ($value < $options['value']['min']) {
                                     return false;
                                 }
                             }
-                            if (isset($aOpt['value']['max'])) {
-                                if ($mValue > $aOpt['value']['max']) {
+                            if (isset($options['value']['max'])) {
+                                if ($value > $options['value']['max']) {
                                     return false;
                                 }
                             }
@@ -229,59 +218,54 @@ class Validator implements RunnableInterface
                     }
                     return true;
                 },
-                function ($sFieldName, array $aOpt = array()) {
-                    if (!empty($aOpt)) {
-                        $aKeys = array_keys($aOpt);
-                        $sKeys = implode(', ', $aKeys);
-                        return "Invalid number field '{$sFieldName}' value. "
-                        . "Validation options: {$sKeys}";
+                function (string $fieldName, array $options = []) {
+                    if (!empty($options)) {
+                        $keys = implode(', ', array_keys($options));
+                        return "Invalid number field '{$fieldName}' value. "
+                        . "Validation options: {$keys}";
                     }
-                    return "Invalid number field '{$sFieldName}' value.";
+                    return "Invalid number field '{$fieldName}' value.";
                 }
             )
             // Array rules
             ->addRule(
                 'array',
-                function ($sFieldName, array $aOpt = array()) use ($aData) {
-                    if (\nadir2\core\validator\Validator::isIndexSet(
-                        $aData,
-                        $sFieldName
-                    )) {
-                        $mValue = \nadir2\core\validator\Validator
-                        ::getArrayItemByPointSeparatedKey($aData, $sFieldName);
-                        if (!is_array($mValue)) {
+                function (string $fieldName, array $options = []) use ($data): bool {
+                    if (self::isIndexSet($data, $fieldName)) {
+                        $value = self::getArrayItemByPointSeparatedKey($data, $fieldName);
+                        if (!is_array($value)) {
                             return false;
                         }
-                        if (isset($aOpt['assoc'])) {
-                            $funcIsAssoc = function (array $aArray) {
+                        if (isset($options['assoc'])) {
+                            $isAssoc = function (array $array): bool {
                                 // return false if array is empty
                                 return (bool) count(array_filter(
-                                    array_keys($aArray),
+                                    array_keys($array),
                                     'is_string'
                                 ));
                             };
-                            if ($aOpt['assoc'] && !$funcIsAssoc($mValue)) {
+                            if ($options['assoc'] && !$isAssoc($value)) {
                                 return false;
                             }
-                            if (!$aOpt['assoc'] && $funcIsAssoc($mValue)) {
+                            if (!$options['assoc'] && $isAssoc($value)) {
                                 return false;
                             }
-                            unset($funcIsAssoc);
+                            unset($isAssoc);
                         }
-                        if (isset($aOpt['length'])) {
-                            $nLength = count($mValue);
-                            if (isset($aOpt['length']['min'])) {
-                                if ($nLength < $aOpt['length']['min']) {
+                        if (isset($options['length'])) {
+                            $length = count($value);
+                            if (isset($options['length']['min'])) {
+                                if ($length < $options['length']['min']) {
                                     return false;
                                 }
                             }
-                            if (isset($aOpt['length']['max'])) {
-                                if ($nLength > $aOpt['length']['max']) {
+                            if (isset($options['length']['max'])) {
+                                if ($length > $options['length']['max']) {
                                     return false;
                                 }
                             }
-                            if (isset($aOpt['length']['equal'])) {
-                                if ($nLength != $aOpt['length']['equal']) {
+                            if (isset($options['length']['equal'])) {
+                                if ($length != $options['length']['equal']) {
                                     return false;
                                 }
                             }
@@ -289,48 +273,42 @@ class Validator implements RunnableInterface
                     }
                     return true;
                 },
-                function ($sFieldName, array $aOpt = array()) {
-                    if (!empty($aOpt)) {
-                        $aKeys = array_keys($aOpt);
-                        $sKeys = implode(', ', $aKeys);
-                        return "Invalid array field '{$sFieldName}' value. "
-                        . "Validation options: {$sKeys}";
+                function (string $fieldName, array $options = []): string {
+                    if (!empty($options)) {
+                        $keys = implode(', ', array_keys($options));
+                        return "Invalid array field '{$fieldName}' value. "
+                        . "Validation options: {$keys}";
                     }
-                    return "Invalid array field '{$sFieldName}' value.";
+                    return "Invalid array field '{$fieldName}' value.";
                 }
             )
             // Boolean rules
             ->addRule(
                 'boolean',
-                function ($sFieldName, array $aOpt = array()) use ($aData) {
-                    if (\nadir2\core\validator\Validator::isIndexSet(
-                        $aData,
-                        $sFieldName
-                    )) {
-                        $mValue = \nadir2\core\validator\Validator
-                        ::getArrayItemByPointSeparatedKey($aData, $sFieldName);
-                        if (!is_bool($mValue)) {
+                function (string $fieldName, array $options = []) use ($data): bool {
+                    if (self::isIndexSet($data, $fieldName)) {
+                        $value = self::getArrayItemByPointSeparatedKey($data, $fieldName);
+                        if (!is_bool($value)) {
                             return false;
                         }
-                        if (isset($aOpt['isTrue'])) {
-                            if ($aOpt['isTrue'] && !$mValue) {
+                        if (isset($options['isTrue'])) {
+                            if ($options['isTrue'] && !$value) {
                                 return false;
                             }
-                            if (!$aOpt['isTrue'] && $mValue) {
+                            if (!$options['isTrue'] && $value) {
                                 return false;
                             }
                         }
                     }
                     return true;
                 },
-                function ($sFieldName, array $aOpt = array()) {
-                    if (!empty($aOpt)) {
-                        $aKeys = array_keys($aOpt);
-                        $sKeys = implode(', ', $aKeys);
-                        return "Invalid boolean field '{$sFieldName}' value. "
-                        . "Validation options: {$sKeys}";
+                function (string $fieldName, array $options = []): string {
+                    if (!empty($options)) {
+                        $keys = implode(', ', array_keys($options));
+                        return "Invalid boolean field '{$fieldName}' value. "
+                        . "Validation options: {$keys}";
                     }
-                    return "Invalid boolean field '{$sFieldName}' value.";
+                    return "Invalid boolean field '{$fieldName}' value.";
                 }
             );
     }
@@ -338,137 +316,133 @@ class Validator implements RunnableInterface
     /**
      * The method adds a set of fields and their corresponding rules and parameters
      * for validating the input data
-     * @param array $aItem This set is an array whose first element is a string
+     * @param array $item This set is an array whose first element is a string
      * with a field name (or an array of field names), the second element is the
      * name of the validation rule (always a string), the third element is an
      * optional array of validation options.
-     * @return self.
-     * @throws \extensions\validator\Exception.
+     * @return self
+     * @throws \extensions\validator\Exception
      */
-    public function addItem(array $aItem)
+    public function addItem(array $item): self
     {
-        if (count($aItem) < 2) {
+        if (count($item) < 2) {
             throw new Exception('Invalid count of item elements.');
         }
-        $this->items[] = $aItem;
+        $this->items[] = $item;
         return $this;
     }
 
     /**
      * This is mass analog for addItem() method.
-     * @param array $aItems The input array of sets.
-     * @return self.
+     * @param array $items The input array of sets.
+     * @return self
      */
-    public function setItems(array $aItems)
+    public function setItems(array $items): self
     {
-        foreach ($aItems as $aItem) {
-            $this->addItem($aItem);
+        foreach ($items as $item) {
+            $this->addItem($item);
         }
         return $this;
     }
 
     /**
      * The method adds a validation rule to the stack of validator rulesets.
-     * @param type $sName The name of rule.
-     * @param callable $funcCall The callback function that defines the functional
+     * @param string $name The name of rule.
+     * @param callable $func The callback function that defines the functional
      * of the data validation rule. The first parameter is the name of the validated
      * field, the second optional parameter is the set of validation options,
      * and the context (closure) is the input data.
-     * @param string|callable|null $mErrorMsg The error message or callable function
+     * @param string|callable|null $errorMsg The error message or callable function
      * which generates this message. This parameter is optional.
-     * @return self.
-     * @throws \extensions\validator\Exception.
+     * @return self
      */
-    public function addRule($sName, $funcCall, $mErrorMsg = null)
+    public function addRule(string $name, callable $func, $errorMsg = null): self
     {
-        if (is_callable($funcCall)) {
-            $this->rules[$sName] = array($funcCall, $mErrorMsg);
-        } else {
-            throw new Exception("Rule isn't callable.");
-        }
+        $this->rules[$name] = array($func, $errorMsg);
         return $this;
     }
 
     /**
      * The method adds the error message to the error stack which occurred during
      * validation.
-     * @param string $sMsg.
+     * @param string $sMsg
+     * @return void
      */
-    protected function addError($sMsg)
+    protected function addError(string $msg): void
     {
-        $this->errors[] = $sMsg;
+        $this->errors[] = $msg;
     }
 
     /**
      * The method adds default message to form a description of the validation
      * errors.
-     * @param string $sFieldName The field name.
-     * @return string[].
+     * @param string $fieldName The field name.
+     * @return void
      */
-    protected function addDefaultError($sFieldName)
+    protected function addDefaultError(string $fieldName): void
     {
-        return $this->addError("Invalid field '{$sFieldName}' value.");
+        $this->addError("Invalid field '{$fieldName}' value.");
     }
 
     /**
      * The method applies the validation rule to the validable field.
-     * @param string $sFieldName The field name. The name of the nested field is
+     * @param string $fieldName The field name. The name of the nested field is
      * formed by the path of the tree the tiers of which are separated by the point.
-     * @param string $sRuleName The validation rule name.
-     * @param array $aOpt The validation options.
-     * @throws \extensions\validator\Exception.
+     * @param string $ruleName The validation rule name.
+     * @param array $options The validation options.
+     * @return void
+     * @throws \extensions\validator\Exception
      */
     private function applyRuleToField(
-        $sFieldName,
-        $sRuleName,
-        array $aOpt = array()
-    ) {
-        if (!isset($this->rules[$sRuleName])) {
+        string $fieldName,
+        string $ruleName,
+        array $options = []
+    ): void {
+        if (!isset($this->rules[$ruleName])) {
             throw new Exception('Undefined rule name.');
         }
-        $funcCall = $this->rules[$sRuleName][0];
-        if (!$funcCall($sFieldName, $aOpt)) {
-            if (isset($this->rules[$sRuleName][1])) {
-                if (is_callable($this->rules[$sRuleName][1])) {
+        $func = $this->rules[$ruleName][0];
+        if (!$func($fieldName, $options)) {
+            if (isset($this->rules[$ruleName][1])) {
+                if (is_callable($this->rules[$ruleName][1])) {
                     // If message entity is function
-                    $funcMsg = $this->rules[$sRuleName][1];
-                    $this->addError($funcMsg($sFieldName, $aOpt));
+                    $funcMsg = $this->rules[$ruleName][1];
+                    $this->addError($funcMsg($fieldName, $options));
                 } else {
                     // If message entity is string
-                    $this->addError((string) $this->rules[$sRuleName][1]);
+                    $this->addError((string) $this->rules[$ruleName][1]);
                 }
             } else {
                 // If message entity isn't set
-                $this->addDefaultError($sFieldName);
+                $this->addDefaultError($fieldName);
             }
         }
     }
 
     /**
      * The main executable method.
-     * @return self.
+     * @return void
      */
-    public function run()
+    public function run(): void
     {
         if (!$this->isRan) {
             $this->isRan = true;
-            foreach ($this->items as $aItem) {
-                $mOpt      = isset($aItem[2]) ? $aItem[2] : array();
-                $sRuleName = $aItem[1];
-                foreach (is_array($aItem[0]) ? $aItem[0] : array($aItem[0]) as $sFieldName) {
-                    self::applyRuleToField($sFieldName, $sRuleName, $mOpt);
+            foreach ($this->items as $item) {
+                $options      = $item[2] ?? [];
+                $ruleName = $item[1];
+                foreach (is_array($item[0]) ? $item[0] : [$item[0]] as $fieldName) {
+                    self::applyRuleToField($fieldName, $ruleName, $options);
                 }
             }
         }
-        return $this;
     }
 
     /**
      * It checks if processed input data is valid or not.
-     * @return boolean.
-     * @throws \extensions\validator\Exception.
+     * @return boolean
+     * @throws \extensions\validator\Exception
      */
-    public function isValid()
+    public function isValid(): bool
     {
         if (!$this->isRan) {
             throw new Exception("The validation wasn't ran.");
@@ -482,7 +456,7 @@ class Validator implements RunnableInterface
      * @return string[] The array of validation errors.
      * @throws \extensions\validator\Exception.
      */
-    public function getErrors()
+    public function getErrors(): array
     {
         if (!$this->isRan) {
             throw new Exception("The validation wasn't ran.");

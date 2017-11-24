@@ -8,5 +8,5 @@ namespace nadir2\core\validator;
  */
 class Exception extends \Exception
 {
-    //put your code here
+    // Nothing here
 }
