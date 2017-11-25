@@ -41,7 +41,7 @@ class Headers implements RunnableInterface
      * It returns the human readable explanation of HTTP status code.
      * @param integer $code The status code.
      * @return string The description.
-     * @throws \nadir2\core\Exception It's throwen if unknown HTTP code was passed.
+     * @throws \nadir2\core\Exception It's thrown if unknown HTTP code was passed.
      */
     public static function getHTTPExplanationByCode(int $code): string
     {
@@ -133,7 +133,7 @@ class Headers implements RunnableInterface
      * It adds the header to the stack.
      * @param string $header The page header.
      * @return self.
-     * @throws \nadir2\core\Exception It's throwen if the passed header has already
+     * @throws \nadir2\core\Exception It's thrown if the passed header has already
      * been added earlier.
      */
     public function add(string $header): self

@@ -26,7 +26,7 @@ class WebCtrlResolver extends AbstractCtrlResolver
      * It creates the controller object, assignes it with default view and layout
      * objects.
      * @return \nadir2\core\AWebController
-     * @throws \nadir2\core\Exception It's throwen if the 'componentsRootMap.controllers'
+     * @throws \nadir2\core\Exception It's thrown if the 'componentsRootMap.controllers'
      * field not presented in the main config.
      */
     protected function createCtrl(): AbstractCtrl
@@ -87,7 +87,7 @@ class WebCtrlResolver extends AbstractCtrlResolver
 
     /**
      * It runs the controller action on execution.
-     * @throws \nadir2\core\Exception It's throwen if the attempt to assign controller
+     * @throws \nadir2\core\Exception It's thrown if the attempt to assign controller
      * with current route path was failed.
      */
     public function run(): void

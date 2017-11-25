@@ -22,19 +22,17 @@ abstract class AbstractWebCtrl extends AbstractCtrl
     /**
      * The constructor assigns object with request object and possibly with
      * the view object (full or partial).
-     * @param \nadir2\core\Request $oRequest The request object.
-     * @param \nadir2\core\AbstractView|null $oView The view object.
+     * @param \nadir2\core\Request $request The request object.
+     * @param \nadir2\core\AbstractView|null $view The view object.
      */
-    public function __construct(Request $oRequest, AbstractView $oView = null)
+    public function __construct(Request $request, AbstractView $view = null)
     {
-        $this->request = $oRequest;
-        if (!is_null($oView)) {
-            if ($oView instanceof View) {
-                $this->view = $oView;
-            } elseif ($oView instanceof Layout) {
-                $this->layout = $oView;
-                $this->view   = $this->layout->view;
-            }
+        $this->request = $request;
+        if ($view instanceof View) {
+            $this->view = $view;
+        } elseif ($view instanceof Layout) {
+            $this->layout = $view;
+            $this->view   = $this->layout->view;
         }
     }
 
@@ -42,7 +40,7 @@ abstract class AbstractWebCtrl extends AbstractCtrl
      * It returns the object of assigned request.
      * @return \nadir2\core\Request|null.
      */
-    public function getRequest()
+    public function getRequest(): ?Request
     {
         return $this->request;
     }
@@ -51,21 +49,21 @@ abstract class AbstractWebCtrl extends AbstractCtrl
      * It returns the object of associated view.
      * @return \nadir2\core\View|null.
      */
-    protected function getView()
+    protected function getView(): ?View
     {
         return $this->view;
     }
 
     /**
-     * It used for binding the controller with a view (both with the default
+     * It's used for binding the controller with a view (both with the default
      * and with corresponding another controller).
-     * @param string $sCtrlName The controller name.
-     * @param string $sActionName The action name (without prefix action).
+     * @param string $ctrlName The controller name.
+     * @param string $actionName The action name (without prefix action).
      * @return void.
      */
-    protected function setView($sCtrlName, $sActionName)
+    protected function setView(string $ctrlName, string $actionName): void
     {
-        $this->view = ViewFactory::createView($sActionName, $sCtrlName);
+        $this->view = ViewFactory::createView($actionName, $ctrlName);
         if (!is_null($this->layout)) {
             $this->layout->view = $this->view;
         }
@@ -75,31 +73,32 @@ abstract class AbstractWebCtrl extends AbstractCtrl
      * It returns the object of associated layout.
      * @return \nadir2\core\Layout|null.
      */
-    protected function getLayout()
+    protected function getLayout(): ?Layout
     {
         return $this->layout;
     }
 
     /**
-     * It assigns the controller with layout.
-     * @param string $sLayoutName The layout name.
-     * @return void.
-     * @throws Exception.
+     * It assosiates the controller with the layout.
+     * @param string $layoutName The layout name.
+     * @return void
+     * @throws \nadir2\core\Exception It's thrown if the layout doesn't contain
+     * a view.
      */
-    protected function setLayout($sLayoutName)
+    protected function setLayout(string $layoutName): void
     {
         if (is_null($this->view)) {
             throw new Exception("It's unable to set Layout without View.");
         }
-        $this->layout = ViewFactory::createLayout($sLayoutName, $this->view);
+        $this->layout = ViewFactory::createLayout($layoutName, $this->view);
     }
 
     /**
      * It renders the page both full (layout with view) and partial (view only).
-     * @return void.
-     * @throws Exception.
+     * @return void
+     * @throws \nadir2\core\Exception It's thrown if the view is empty.
      */
-    protected function render()
+    protected function render(): void
     {
         if (!is_null($this->layout)) {
             $this->layout->render();
@@ -112,58 +111,37 @@ abstract class AbstractWebCtrl extends AbstractCtrl
 
     /**
      * The method provides partial rendering (view without layout).
-     * @return void.
+     * @return void
      */
-    protected function partialRender()
+    protected function partialRender(): void
     {
         $this->view->render();
     }
 
     /**
-     * The method converts escaped Unicode chars to unescaped.
-     * @param string $sData The input string.
-     * @return string.
-     */
-    private static function unescapeUnicode($sData)
-    {
-        return preg_replace_callback(
-            '/\\\\u([0-9a-f]{4})/i',
-            function (array & $aMatches) {
-                $sSym = mb_convert_encoding(
-                    pack('H*', $aMatches[1]),
-                    'UTF-8',
-                    'UTF-16'
-                );
-                return $sSym;
-            },
-            $sData
-        );
-    }
-
-    /**
      * It renders the page with JSON-formatted data.
-     * @param mixed $mData The input data.
-     * @return void.
+     * @param mixed $data The input data.
+     * @return void
      */
-    protected function renderJson($mData)
+    protected function renderJson($data): void
     {
-        echo self::unescapeUnicode(json_encode($mData));
+        echo json_encode($data, \JSON_UNESCAPED_UNICODE);
     }
 
     /**
      * The method redirects to the URL, which passed as param. The HTTP-code is
      * 302 as default. The method unconditional completes the script execution,
      * the code after it will not be executed.
-     * @param string $sUrl
-     * @param bool $fIsPermanent The flag of permanent redirect.
-     * @return void.
+     * @param string $uri
+     * @param bool $isPermanent The flag of permanent redirect.
+     * @return void
      */
-    protected function redirect($sUrl, $fIsPermanent = false)
+    protected function redirect(string $uri, bool $isPermanent = false): void
     {
-        $nCode = $fIsPermanent ? 301 : 302;
+        $nCode = $isPermanent ? 301 : 302;
         Headers::getInstance()
             ->addByHttpCode($nCode)
-            ->add('Location: '.$sUrl)
+            ->add('Location: '.$uri)
             ->run();
         exit;
     }

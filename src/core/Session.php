@@ -58,7 +58,7 @@ class Session implements ArrayCollectionInterface
      * The method sets the name of current session.
      * @param string $name By default it's PHPSESSID.
      * @return void
-     * @throws Exception It's throwen if passed name consists digits only or is empty.
+     * @throws Exception It's thrown if passed name consists digits only or is empty.
      */
     public function setName(string $name): void
     {

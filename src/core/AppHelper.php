@@ -76,7 +76,7 @@ class AppHelper implements RunnableInterface
     /**
      * It loads main file of configuration and checks for validity.
      * @return void
-     * @throws Exception It's throwen if some errors with the main configuration
+     * @throws Exception It's thrown if some errors with the main configuration
      * file occurred.
      */
     public function run(): void

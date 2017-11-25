@@ -23,7 +23,7 @@ class CliApp extends AbstractApp
      * It processes the call parameters of cli-script and passed them to the
      * CliCtrlResolver object.
      * @global string[] $argv The array of passed to cli-scrypt args.
-     * @throws \nadir2\core\Exception It's throwen if it was attempting to call cli-scprit
+     * @throws \nadir2\core\Exception It's thrown if it was attempting to call cli-scprit
      * out the command line interface.
      */
     public function handleRequest(): void

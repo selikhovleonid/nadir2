@@ -15,7 +15,7 @@ class CliCtrlResolver extends AbstractCtrlResolver
     /**
      * The object properties initialization.
      * @param string[] $args The array of passed to the script arguments.
-     * @throws \nadir2\core\Exception It's throwen if it wasn't passed the route
+     * @throws \nadir2\core\Exception It's thrown if it wasn't passed the route
      * as the first call param.
      */
     public function __construct(array $args)
@@ -69,7 +69,7 @@ class CliCtrlResolver extends AbstractCtrlResolver
 
     /**
      * It executes the action of controller.
-     * @throws \nadir2\core\Exception It's throwen if it was unable to assign
+     * @throws \nadir2\core\Exception It's thrown if it was unable to assign
      * controller to the route path.
      */
     public function run(): void
