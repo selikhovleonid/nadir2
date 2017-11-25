@@ -6,7 +6,7 @@ namespace nadir2\core;
  * This is a view abstract class.
  * @author Leonid Selikhov
  */
-abstract class AbstractView extends AbstractUserPropAccessor
+abstract class AbstractView
 {
     /** @var string The path to the file with view markup. */
     protected $filePath = '';
