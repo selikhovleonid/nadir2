@@ -9,4 +9,5 @@ namespace nadir2\core;
  */
 abstract class AbstractCtrl
 {
+    // Nothing here...
 }
