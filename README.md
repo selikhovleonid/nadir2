@@ -443,7 +443,6 @@ use nadir2\core\AppHelper;
 
 /**
  * This is the auth general class for custom extension.
- * @author Leonid Selikhov
  */
 class Auth extends AbstractAuth
 {
