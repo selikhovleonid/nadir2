@@ -383,7 +383,7 @@ of the method call `$this->getSnippet('topbar')->render()`.
 
 ## Model
 
-Nadir doesn't contain certain rules and regulations for building a model. The 
+Nadir2 doesn't contain certain rules and regulations for building a model. The 
 concrete implementation of this component of the MVC pattern is given to the developer.
 Depending on many factors, the model can be represented as one layer (single object), 
 and several levels of abstraction (a complex hierarchy of associated objects).
@@ -431,7 +431,7 @@ class Test extends AbstractWebCtrl
 
 ## Authorization
 
-Nadir provides a wide range of customization options for user authorization. It's 
+Nadir2 provides a wide range of customization options for user authorization. It's 
 necessary to fill the `\extensions\core\Auth` class with a concrete functional for
 this.
 
@@ -446,7 +446,7 @@ use nadir2\core\AppHelper;
  */
 class Auth extends AbstractAuth
 {
-    /** @var \nadir\core2\Request The request object. */
+    /** @var \nadir2\core\Request The request object. */
     protected $request = null;
 
     /** @var array The route config. */
