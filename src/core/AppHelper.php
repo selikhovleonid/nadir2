@@ -7,8 +7,10 @@ namespace nadir2\core;
  * access to them. It's realized as Singleton.
  * @author Leonid Selikhov.
  */
-class AppHelper extends AbstractAutoAccessors implements RunnableInterface
+class AppHelper implements RunnableInterface
 {
+    use PropertyMethodsTrait;
+    
     /** @var string The path to the application root. */
     public $appRoot = null;
 

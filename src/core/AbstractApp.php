@@ -8,10 +8,10 @@ namespace nadir2\core;
  * Front Controller pattern, it's Singleton-instance.
  * @author Leonid Selikhov
  */
-abstract class AbstractApp extends AbstractAutoAccessors implements
-    FrontControllerInterface,
-    RunnableInterface
+abstract class AbstractApp implements FrontControllerInterface, RunnableInterface
 {
+    use PropertyMethodsTrait;
+
     /** @var string This is path to the config file root. */
     public $configFile = '';
 
