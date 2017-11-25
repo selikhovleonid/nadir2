@@ -27,9 +27,9 @@ class Headers implements RunnableInterface
 
     /**
      * It returns the singleton instance of current class.
-     * @return self.
+     * @return self
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
