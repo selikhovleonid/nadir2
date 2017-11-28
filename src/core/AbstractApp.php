@@ -10,15 +10,27 @@ namespace nadir2\core;
  */
 abstract class AbstractApp implements FrontControllerInterface, RunnableInterface
 {
-    use PropertyMethodsTrait;
+    use \nadir2\tools\AccessorsTrait;
 
-    /** @var string This is path to the config file root. */
-    public $configFile = '';
+    /**
+     * @var string This is path to the config file root.
+     * @get
+     * @isset
+     */
+    protected $configFile = '';
 
-    /** @var string The path to the root of application. */
-    public $appRoot = '';
+    /**
+     * @var string The path to the root of application.
+     * @get
+     * @isset
+     */
+    protected $appRoot = '';
 
-    /** @var \nadir2\core\ProcessInterface The user defined Process object. */
+    /**
+     * @var \nadir2\core\ProcessInterface The user defined Process object.
+     * @get
+     * @isset
+     */
     public $customProcess = null;
 
     /** @var self This is singleton object of the current class. */

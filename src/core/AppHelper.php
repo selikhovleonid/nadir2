@@ -9,15 +9,26 @@ namespace nadir2\core;
  */
 class AppHelper implements RunnableInterface
 {
-    use PropertyMethodsTrait;
+    use \nadir2\tools\AccessorsTrait;
     
-    /** @var string The path to the application root. */
-    public $appRoot = null;
+    /**
+     * @var string The path to the application root.
+     * @get
+     * @isset
+     */
+    protected $appRoot = null;
 
-    /** @var string The path to the configuration file. */
-    public $configFile = null;
+    /**
+     * @var string The path to the configuration file.
+     * @get
+     * @isset
+     */
+    protected $configFile = null;
 
-    /** @var string The route configuration. */
+    /**
+     * @var string The route configuration.
+     * @accessors
+     */
     public $routeConfig = null;
 
     /** @var self The singleton-object of current class. */
